@@ -1,250 +1,206 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import gsap from 'gsap';
-import * as THREE from 'three';
+import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { useRecruiter } from '../context/RecruiterContext';
+import { FiArrowRight, FiDownload, FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
 
 const Hero: React.FC = () => {
-  const heroRef = useRef<HTMLElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { isRecruiterMode } = useRecruiter();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
   const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 300], [0, -100]);
-  const y2 = useTransform(scrollY, [0, 300], [0, -50]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0.8]);
+  const y1 = useTransform(scrollY, [0, 500], [0, 200]);
 
+  // Effect for mouse parallax
   useEffect(() => {
-    // Mouse tracking for interactive effects
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({
-        x: (e.clientX / window.innerWidth - 0.5) * 2,
-        y: (e.clientY / window.innerHeight - 0.5) * 2,
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight,
       });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-
-    // GSAP animations on mount
-    const tl = gsap.timeline();
-    tl.fromTo(titleRef.current,
-      { opacity: 0, y: 100, rotateX: -90 },
-      { opacity: 1, y: 0, rotateX: 0, duration: 1.2, ease: 'power3.out' }
-    )
-    .fromTo(subtitleRef.current,
-      { opacity: 0, y: 50, scale: 0.8 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'back.out(1.7)' },
-      '-=0.7'
-    )
-    .fromTo(buttonRef.current,
-      { opacity: 0, y: 30, scale: 0.5 },
-      { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.5)' },
-      '-=0.5'
-    );
-
-    // Three.js 3D background
-    if (canvasRef.current) {
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, alpha: true });
-
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      camera.position.z = 5;
-
-      // Create floating geometric shapes
-      const geometry1 = new THREE.IcosahedronGeometry(0.5);
-      const geometry2 = new THREE.OctahedronGeometry(0.3);
-      const geometry3 = new THREE.TetrahedronGeometry(0.4);
-
-      const material = new THREE.MeshBasicMaterial({
-        color: 0xc0c0c0,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.1
-      });
-
-      const mesh1 = new THREE.Mesh(geometry1, material);
-      const mesh2 = new THREE.Mesh(geometry2, material);
-      const mesh3 = new THREE.Mesh(geometry3, material);
-
-      mesh1.position.set(-2, 1, -2);
-      mesh2.position.set(2, -1, -3);
-      mesh3.position.set(0, 2, -1);
-
-      scene.add(mesh1, mesh2, mesh3);
-
-      const animate = () => {
-        requestAnimationFrame(animate);
-
-        mesh1.rotation.x += 0.005;
-        mesh1.rotation.y += 0.01;
-        mesh2.rotation.x += 0.008;
-        mesh2.rotation.y += 0.006;
-        mesh3.rotation.x += 0.003;
-        mesh3.rotation.y += 0.009;
-
-        // Interactive rotation based on mouse
-        mesh1.rotation.x += mousePosition.y * 0.01;
-        mesh1.rotation.y += mousePosition.x * 0.01;
-        mesh2.rotation.x += mousePosition.x * 0.008;
-        mesh2.rotation.y += mousePosition.y * 0.008;
-        mesh3.rotation.x += mousePosition.y * 0.005;
-        mesh3.rotation.y += mousePosition.x * 0.005;
-
-        renderer.render(scene, camera);
-      };
-
-      animate();
-
-      const handleResize = () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      };
-
-      window.addEventListener('resize', handleResize);
-
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener('mousemove', handleMouseMove);
-        renderer.dispose();
-      };
+    if (!isRecruiterMode) {
+      window.addEventListener('mousemove', handleMouseMove);
     }
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [isRecruiterMode]);
 
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [mousePosition]);
+  // Typing effect content
+  const roles = ["Dynamics 365 Architect", "Power Platform Expert", ".NET Developer"];
+  const [roleIndex, setRoleIndex] = useState(0);
 
-  const scrollToProjects = () => {
-    const projectsSection = document.getElementById('projects');
-    projectsSection?.scrollIntoView({ behavior: 'smooth' });
-  };
+  useEffect(() => {
+    if (isRecruiterMode) return;
+    const interval = setInterval(() => {
+      setRoleIndex((prev) => (prev + 1) % roles.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isRecruiterMode]);
 
   return (
-    <motion.section
-      ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-futuristic-black via-futuristic-dark to-futuristic-black"
-      style={{ opacity }}
-    >
-      {/* 3D Canvas Background */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ zIndex: 1 }}
-      />
-
-      {/* Animated Background Gradient */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-radial from-metallic-silver/10 via-transparent to-transparent"
-        animate={{
-          background: [
-            'radial-gradient(circle at 20% 50%, rgba(192, 192, 192, 0.1) 0%, transparent 50%)',
-            'radial-gradient(circle at 80% 20%, rgba(192, 192, 192, 0.15) 0%, transparent 50%)',
-            'radial-gradient(circle at 40% 80%, rgba(192, 192, 192, 0.1) 0%, transparent 50%)',
-            'radial-gradient(circle at 20% 50%, rgba(192, 192, 192, 0.1) 0%, transparent 50%)',
-          ]
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-        style={{ zIndex: 2 }}
-      />
-
-      {/* Floating Particles */}
-      <div className="absolute inset-0" style={{ zIndex: 3 }}>
-        {[...Array(20)].map((_, i) => (
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+      {/* Background Elements - Dissabled in Recruiter Mode */}
+      {!isRecruiterMode && (
+        <>
           <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-metallic-silver/30 rounded-full"
+            className="absolute top-0 left-0 w-full h-full z-0 opacity-30 dark:opacity-20"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              backgroundImage: 'radial-gradient(circle at 50% 50%, var(--accent-primary) 0%, transparent 50%)',
+              transform: `translate(${mousePosition.x * -20}px, ${mousePosition.y * -20}px)`,
             }}
+          />
+          <motion.div
+            className="absolute top-1/4 right-1/4 w-64 h-64 bg-accent-secondary rounded-full blur-[100px] opacity-20"
             animate={{
-              y: [0, -100, 0],
-              x: [0, Math.random() * 50 - 25, 0],
-              opacity: [0.3, 0.8, 0.3],
-              scale: [1, 1.5, 1],
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.3, 0.2],
             }}
             transition={{
-              duration: 6 + Math.random() * 4,
+              duration: 5,
               repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: 'easeInOut',
+              ease: "easeInOut",
             }}
           />
-        ))}
+        </>
+      )}
+
+      <div className="container mx-auto px-6 z-10 relative grid md:grid-cols-2 gap-12 items-center">
+        {/* Text Content */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          {/* Availability Badge */}
+          <div className="inline-flex items-center space-x-2 bg-accent-primary/10 border border-accent-primary/20 rounded-full px-4 py-1.5 mb-6">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            </span>
+            <span className="text-sm font-medium text-accent-primary">Available for Hiring</span>
+          </div>
+
+          <motion.h1
+            className="text-5xl md:text-7xl font-bold mb-6 leading-tight tracking-tight"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+              }
+            }}
+          >
+            <motion.span variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="block">
+              Hi, I'm
+            </motion.span>
+            <motion.span
+              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+              className="text-transparent bg-clip-text bg-gradient-to-r from-accent-primary to-accent-secondary block"
+            >
+              Abhijit Behera
+            </motion.span>
+          </motion.h1>
+
+          <div className="h-20 mb-8">
+            {isRecruiterMode ? (
+              <p className="text-2xl text-text-secondary font-medium">Dynamics 365 Technical Consultant</p>
+            ) : (
+              <div className="text-2xl md:text-3xl text-text-secondary font-light relative h-10 w-full">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={roleIndex}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute top-0 left-0"
+                  >
+                    I am a{' '}
+                    <span className="text-text-primary font-medium">
+                      {roles[roleIndex]}
+                    </span>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+
+          <p className="text-lg text-text-secondary mb-8 max-w-lg leading-relaxed">
+            Specializing in end-to-end CRM implementations, Plugin development, and Power Platform solutions. Transforming business requirements into scalable technical realities.
+          </p>
+
+          <div className="flex flex-wrap gap-4">
+            <motion.a
+              href="#projects"
+              whileHover={{ y: -5, boxShadow: "0 10px 30px -10px var(--accent-primary)" }}
+              whileTap={{ scale: 0.98 }}
+              className="px-8 py-4 bg-accent-primary text-white rounded-lg font-medium transition-all flex items-center space-x-2 group relative overflow-hidden"
+            >
+              <span className="relative z-10">View My Work</span>
+              <FiArrowRight className="group-hover:translate-x-1 transition-transform relative z-10" />
+            </motion.a>
+            <motion.a
+              href="/resume.pdf"
+              target="_blank"
+              whileHover={{ y: -5, backgroundColor: "var(--bg-secondary)" }}
+              whileTap={{ scale: 0.98 }}
+              className="px-8 py-4 bg-background-tertiary text-text-primary rounded-lg font-medium border border-line flex items-center space-x-2 transition-all"
+            >
+              <FiDownload />
+              <span>Resume</span>
+            </motion.a>
+          </div>
+
+          {!isRecruiterMode && (
+            <div className="mt-12 flex space-x-6">
+              <SocialLink href="https://github.com/Abhijit877" icon={<FiGithub />} />
+              <SocialLink href="https://linkedin.com" icon={<FiLinkedin />} />
+              <SocialLink href="https://twitter.com" icon={<FiTwitter />} />
+            </div>
+          )}
+        </motion.div>
+
+        {/* Visual/Image Side */}
+        <motion.div
+          style={{ y: y1 }}
+          className="relative hidden md:flex items-center justify-center pointer-events-none"
+        >
+          {/* Abstract Tech Visual */}
+          <div className="relative w-96 h-96">
+            <div className="absolute inset-0 border-2 border-accent-primary/30 rounded-full animate-[spin_10s_linear_infinite]" />
+            <div className="absolute inset-4 border-2 border-accent-secondary/30 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-64 h-64 bg-gradient-to-tr from-accent-primary/20 to-accent-secondary/20 rounded-full backdrop-blur-3xl" />
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Main Content */}
-      <motion.div
-        className="relative z-10 text-center max-w-4xl mx-auto px-6"
-        style={{ y: y1 }}
-      >
-        <motion.h1
-          ref={titleRef}
-          className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-glow-white via-metallic-silver to-glow-white bg-clip-text text-transparent animate-glow-pulse"
-          style={{
-            textShadow: '0 0 40px rgba(192, 192, 192, 0.5)',
-            transform: `perspective(1000px) rotateX(${mousePosition.y * 5}deg) rotateY(${mousePosition.x * 5}deg)`,
-          }}
-        >
-          <span className="inline-block hover:scale-110 transition-transform duration-300">S</span>
-          <span className="inline-block hover:scale-110 transition-transform duration-300">a</span>
-          <span className="inline-block hover:scale-110 transition-transform duration-300">r</span>
-          <span className="inline-block hover:scale-110 transition-transform duration-300">t</span>
-          <span className="inline-block hover:scale-110 transition-transform duration-300">h</span>
-          <span className="inline-block hover:scale-110 transition-transform duration-300">a</span>
-          <span className="inline-block hover:scale-110 transition-transform duration-300">k</span>
-        </motion.h1>
-
-        <motion.p
-          ref={subtitleRef}
-          className="text-xl md:text-2xl text-metallic-silver mb-12 font-light"
-          style={{ y: y2 }}
-        >
-          Futuristic Developer | AI Enthusiast | Innovator
-        </motion.p>
-
-        <motion.button
-          ref={buttonRef}
-          onClick={scrollToProjects}
-          className="group relative px-8 py-4 bg-gradient-to-r from-metallic-silver to-glow-white text-futuristic-black font-semibold rounded-full shadow-glow hover:shadow-glow-strong transition-all duration-300 overflow-hidden"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <span className="relative z-10">Explore My Work</span>
-          <motion.span
-            className="inline-block ml-2"
-            animate={{ x: [0, 5, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            →
-          </motion.span>
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-glow-white to-metallic-silver opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            initial={false}
-          />
-        </motion.button>
-      </motion.div>
-
       {/* Scroll Indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        <div className="w-6 h-10 border-2 border-metallic-silver rounded-full flex justify-center">
-          <motion.div
-            className="w-1 h-3 bg-metallic-silver rounded-full mt-2"
-            animate={{ y: [0, 12, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-        </div>
-      </motion.div>
-    </motion.section>
+      {!isRecruiterMode && (
+        <motion.div
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2 opacity-50"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <span className="text-xs uppercase tracking-widest mb-2">Scroll</span>
+          <div className="w-[1px] h-16 bg-gradient-to-b from-text-primary via-accent-primary to-transparent" />
+        </motion.div>
+      )}
+    </section>
   );
 };
+
+const SocialLink = ({ href, icon }: { href: string; icon: React.ReactNode }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="p-3 bg-background-tertiary rounded-full text-text-secondary hover:text-accent-primary hover:bg-background-secondary transition-all hover:scale-110"
+  >
+    {icon}
+  </a>
+);
 
 export default Hero;
