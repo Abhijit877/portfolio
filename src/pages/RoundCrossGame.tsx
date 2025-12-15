@@ -64,7 +64,7 @@ const RoundCrossGame: React.FC = () => {
     if (isThinking) statusMessage = "AI is thinking...";
 
     return (
-        <div className="min-h-screen bg-background-primary flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-background-primary flex flex-col items-center justify-center p-4 pt-24 relative overflow-hidden">
             {/* Background Elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-20 w-64 h-64 bg-accent-primary opacity-10 blur-[100px] rounded-full" />

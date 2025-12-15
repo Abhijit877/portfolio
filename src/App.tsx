@@ -8,6 +8,10 @@ import Footer from './components/Footer';
 import AIChatWidget from './components/AIChatWidget';
 import Home from './pages/Home';
 import RoundCrossGame from './pages/RoundCrossGame';
+import DocumentConverter from './pages/DocumentConverter';
+import TypingTest from './pages/TypingTest';
+import MarkdownConverter from './pages/MarkdownConverter';
+import Assistant from './pages/Assistant';
 
 function App() {
   return (
@@ -24,7 +28,11 @@ function App() {
               }>
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/labs/round-cross-ai" element={<RoundCrossGame />} />
+                  <Route path="/labs/assistant" element={<Assistant />} />
+                  <Route path="/labs/minimax" element={<RoundCrossGame />} />
+                  <Route path="/labs/converter" element={<DocumentConverter />} />
+                  <Route path="/labs/typing-test" element={<TypingTest />} />
+                  <Route path="/labs/markdown" element={<MarkdownConverter />} />
                 </Routes>
               </Suspense>
               <Footer />
