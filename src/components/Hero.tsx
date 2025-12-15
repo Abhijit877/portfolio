@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useRecruiter } from '../context/RecruiterContext';
-import { FiArrowRight, FiDownload, FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
+import { FiArrowRight, FiDownload, FiGithub, FiLinkedin, FiTwitter, FiCpu, FiMessageSquare } from 'react-icons/fi';
 
 const Hero: React.FC = () => {
   const { isRecruiterMode } = useRecruiter();
@@ -167,12 +167,70 @@ const Hero: React.FC = () => {
           className="relative hidden md:flex items-center justify-center pointer-events-none"
         >
           {/* Abstract Tech Visual */}
-          <div className="relative w-96 h-96">
-            <div className="absolute inset-0 border-2 border-accent-primary/30 rounded-full animate-[spin_10s_linear_infinite]" />
-            <div className="absolute inset-4 border-2 border-accent-secondary/30 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-64 h-64 bg-gradient-to-tr from-accent-primary/20 to-accent-secondary/20 rounded-full backdrop-blur-3xl" />
-            </div>
+          {/* Interactive Tech Nexus */}
+          {/* Cybernetic Intelligence Core */}
+          <div className="relative w-[500px] h-[500px] flex items-center justify-center perspective-1000">
+
+            {/* Core Glow */}
+            <div className="absolute inset-0 bg-accent-primary/20 blur-[100px] rounded-full animate-pulse" />
+
+            {/* Rotating Rings */}
+            <motion.div
+              style={{ rotateX: 60, rotateZ: 30 }}
+              animate={{ rotateZ: 390 }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="absolute w-96 h-96 border-[1px] border-accent-secondary/30 rounded-full"
+            />
+            <motion.div
+              style={{ rotateX: 60, rotateZ: 30 }}
+              animate={{ rotateZ: -330 }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              className="absolute w-80 h-80 border-[1px] border-accent-primary/30 rounded-full border-dashed"
+            />
+
+            {/* Central Structure */}
+            <motion.div
+              className="relative w-48 h-48"
+              style={{
+                transformStyle: "preserve-3d",
+                rotateX: mousePosition.y * 10,
+                rotateY: mousePosition.x * 10,
+              }}
+            >
+              {/* Cube Faces or Abstract Shape */}
+              <motion.div
+                animate={{ rotateY: 360, rotateX: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="w-full h-full relative transform-style-3d"
+              >
+                <div className="absolute inset-0 border border-accent-primary/50 bg-accent-primary/5 backdrop-blur-sm rounded-xl transform translate-z-12" />
+                <div className="absolute inset-0 border border-accent-primary/50 bg-accent-primary/5 backdrop-blur-sm rounded-xl transform -translate-z-12" />
+                <div className="absolute inset-0 border border-accent-secondary/50 bg-accent-secondary/5 backdrop-blur-sm rounded-xl transform rotate-y-90 translate-z-12" />
+                <div className="absolute inset-0 border border-accent-secondary/50 bg-accent-secondary/5 backdrop-blur-sm rounded-xl transform rotate-y-90 -translate-z-12" />
+
+                {/* Inner Core */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-accent-primary/80 rounded-full blur-md shadow-[0_0_50px_var(--accent-primary)] animate-pulse" />
+              </motion.div>
+            </motion.div>
+
+            {/* Floating Nodes */}
+            {[0, 1, 2, 3].map((i) => (
+              <motion.div
+                key={i}
+                className="absolute w-3 h-3 bg-white rounded-full shadow-[0_0_10px_white]"
+                animate={{
+                  x: [Math.cos(i) * 150, Math.sin(i * 2) * 150, Math.cos(i) * 150],
+                  y: [Math.sin(i) * 150, Math.cos(i * 2) * 150, Math.sin(i) * 150],
+                  scale: [1, 1.5, 1],
+                  opacity: [0.5, 1, 0.5]
+                }}
+                transition={{
+                  duration: 10 + i * 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
           </div>
         </motion.div>
       </div>

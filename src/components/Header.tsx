@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRecruiter } from '../context/RecruiterContext';
+import { useUI } from '../context/UIContext';
+import { Link } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
-import { FiMenu, FiX, FiBriefcase } from 'react-icons/fi';
+import { FiMenu, FiX, FiBriefcase, FiCpu, FiMessageSquare } from 'react-icons/fi';
 
 const Header: React.FC = () => {
   const { isRecruiterMode, toggleRecruiterMode } = useRecruiter();
+  const { setChatOpen } = useUI();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -38,7 +41,7 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-6 flex items-center justify-between">
         {/* Logo Container - Fixed width to prevent layout shift */}
         <div className="w-48 relative h-8 overflow-hidden">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {!isRecruiterMode && isScrolled ? (
               <motion.a
                 key="logo-scrolled"
@@ -79,6 +82,50 @@ const Header: React.FC = () => {
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-primary transition-all group-hover:w-full" />
             </a>
           ))}
+
+          {/* Labs Dropdown */}
+          <div className="relative group">
+            <button className="text-sm font-medium text-text-secondary hover:text-accent-primary transition-colors flex items-center gap-1">
+              Labs <span className="text-[10px] bg-accent-primary text-white px-1.5 py-0.5 rounded-full">New</span>
+            </button>
+            <div className="absolute top-full right-0 mt-2 w-72 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2">
+              <div className="bg-background-primary/95 backdrop-blur-xl border border-line rounded-xl shadow-2xl overflow-hidden p-2 ring-1 ring-white/5">
+                <div className="px-3 py-2 text-xs font-bold text-text-secondary uppercase tracking-widest border-b border-white/5 mb-1">
+                  Playground
+                </div>
+                <button
+                  onClick={() => setChatOpen(true)}
+                  className="w-full text-left p-3 rounded-lg hover:bg-white/5 transition-colors flex items-start gap-4 group/item relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-accent-primary/10 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                  <div className="p-2 bg-background-tertiary rounded-lg border border-white/5 relative z-10 group-hover/item:border-accent-primary/50 transition-colors">
+                    <FiMessageSquare size={18} className="text-accent-primary" />
+                  </div>
+                  <div className="relative z-10">
+                    <div className="font-bold text-text-primary text-sm flex items-center gap-2">
+                      AI Assistant <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    </div>
+                    <div className="text-xs text-text-secondary group-hover/item:text-text-primary transition-colors">Ask about my skills</div>
+                  </div>
+                </button>
+                <Link
+                  to="/labs/round-cross-ai"
+                  className="w-full text-left p-3 rounded-lg hover:bg-white/5 transition-colors flex items-start gap-4 group/item relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-accent-secondary/10 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                  <div className="p-2 bg-background-tertiary rounded-lg border border-white/5 relative z-10 group-hover/item:border-accent-secondary/50 transition-colors">
+                    <FiCpu size={18} className="text-accent-secondary" />
+                  </div>
+                  <div className="relative z-10">
+                    <div className="font-bold text-text-primary text-sm flex items-center gap-2">
+                      Minimax Engine
+                    </div>
+                    <div className="text-xs text-text-secondary group-hover/item:text-text-primary transition-colors">Challenge the AI</div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </div>
 
           <div className="flex items-center space-x-4 pl-4 border-l border-line ml-4">
             {/* Recruiter Toggle */}
