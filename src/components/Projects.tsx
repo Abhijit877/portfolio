@@ -1,7 +1,7 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRecruiter } from '../context/RecruiterContext';
-import { FiGithub, FiExternalLink, FiCode, FiBox } from 'react-icons/fi';
+import { FiGithub, FiExternalLink, FiCode, FiBox, FiLayers, FiDatabase, FiServer } from 'react-icons/fi';
 
 const projects = [
   {
@@ -42,16 +42,43 @@ const projects = [
   }
 ];
 
+const caseStudySteps = [
+  {
+    id: 0,
+    title: "The Problem",
+    content: "Legacy CRM systems were causing a 45% delay in quote generation due to manual data entry and lack of CPQ integration. Sales reps spent more time on admin than selling.",
+    icon: <FiServer className="text-6xl text-red-500" />,
+    highlight: "Manual Entry & Latency"
+  },
+  {
+    id: 1,
+    title: "The Architecture",
+    content: "Designed a clean architecture using Azure Logic Apps as the middleware BFF (Backend for Frontend). This decoupled the D365 UI from the SAP ERP, ensuring non-blocking operations.",
+    icon: <FiLayers className="text-6xl text-blue-500" />,
+    highlight: "Azure Middleware & decoupling"
+  },
+  {
+    id: 2,
+    title: "The Solution",
+    content: "Implemented a custom PCF Grid for rapid product selection and a Power Automate flow for PDF generation. Reduced quote cycle time from 2 days to 2 hours.",
+    icon: <FiDatabase className="text-6xl text-green-500" />,
+    highlight: "PCF & Automation"
+  }
+];
+
 const Projects: React.FC = () => {
   const { isRecruiterMode } = useRecruiter();
+  const [activeStep, setActiveStep] = useState(0);
 
   return (
     <section className="py-20 bg-background-primary transition-colors duration-300">
       <div className="container mx-auto px-6">
-        <div className="flex justify-between items-end mb-12">
+
+        {/* Header */}
+        <div className="flex justify-between items-end mb-16">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Projects</h2>
-            <p className="text-text-secondary max-w-xl">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">Selected Works</h2>
+            <p className="text-text-secondary max-w-xl text-lg">
               Delivering enterprise value through Dynamics 365 customizations and PCF component development.
             </p>
           </div>
@@ -60,6 +87,52 @@ const Projects: React.FC = () => {
             <FiExternalLink className="ml-2" />
           </a>
         </div>
+
+        {/* Featured Case Study: Scroll Story */}
+        {!isRecruiterMode && (
+          <div className="mb-32">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-accent-primary mb-8 ml-2">Deep Dive Case Study</h3>
+            <div className="flex flex-col md:flex-row gap-12">
+
+              {/* Sticky Visual Side */}
+              <div className="md:w-1/2 h-[50vh] md:h-screen sticky top-20 flex items-center justify-center p-8 bg-background-secondary rounded-3xl border border-line overflow-hidden">
+                <div className="absolute inset-0 bg-grid-pattern opacity-10" />
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeStep}
+                    initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, rotate: 5 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex flex-col items-center text-center space-y-6"
+                  >
+                    {caseStudySteps[activeStep].icon}
+                    <h4 className="text-3xl font-bold text-text-primary">{caseStudySteps[activeStep].highlight}</h4>
+                    <div className="w-20 h-1 bg-accent-primary rounded-full" />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Scrolling Narrative Side */}
+              <div className="md:w-1/2 py-20">
+                {caseStudySteps.map((step, index) => (
+                  <motion.div
+                    key={step.id}
+                    className="min-h-[80vh] flex flex-col justify-center p-8 border-l-2 border-line/30 pl-12"
+                    onViewportEnter={() => setActiveStep(index)}
+                    initial={{ opacity: 0.2 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ margin: "-20% 0px -20% 0px", amount: 0.5 }}
+                  >
+                    <span className="text-6xl font-black text-white/5 mb-4 block">0{index + 1}</span>
+                    <h4 className="text-2xl font-bold mb-4 text-accent-primary">{step.title}</h4>
+                    <p className="text-xl text-text-secondary leading-relaxed">{step.content}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
           {projects.map((project, index) => (

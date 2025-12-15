@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets / Environment Environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+github_info.json
+repos.json
