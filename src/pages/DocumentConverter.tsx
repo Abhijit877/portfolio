@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { FiUploadCloud, FiFileText, FiImage, FiDownload, FiCheck, FiCpu, FiActivity, FiLayers, FiAlertCircle } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiUploadCloud, FiFileText, FiImage, FiCheck, FiCpu, FiActivity, FiLayers, FiAlertCircle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import LabLayout from '../components/LabLayout';
 import jsPDF from 'jspdf';
@@ -314,7 +314,7 @@ const DocumentConverter: React.FC = () => {
                                 </div>
                                 <a
                                     href={convertedFileUrl}
-                                    download={`devfolio-export-${Date.now()}.pdf`}
+                                    download={`r4-dev-export-${Date.now()}.pdf`}
                                     className="block w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg font-bold text-sm shadow-lg transition-all"
                                 >
                                     DOWNLOAD ARTIFACT

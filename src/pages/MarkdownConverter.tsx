@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiEdit3, FiEye, FiDownload, FiCopy, FiCheck, FiTrash2, FiFileText, FiLayout, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+
+import { FiEdit3, FiEye, FiDownload, FiCopy, FiCheck, FiTrash2, FiLayout } from 'react-icons/fi';
 import LabLayout from '../components/LabLayout';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
@@ -16,7 +16,7 @@ Experince seamless **instant preview** as you type. This editor is optimized for
 - **Glocal Access**: Export to .md or .html instantly
 
 \`\`\`javascript
-const devfolio = {
+const r4 = {
     version: "2.0.0",
     theme: "Dark Neumorphism",
     performance: "Blazing Fast"

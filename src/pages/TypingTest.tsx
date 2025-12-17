@@ -48,7 +48,7 @@ const TypingTest: React.FC = () => {
     const [isActive, setIsActive] = useState(false);
 
     // Timer ref for accurate intervals
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
