@@ -25,7 +25,7 @@ const labs = [
         icon: <FiCpu />,
         color: 'text-red-500',
         bg: 'bg-red-500/10',
-        border: 'hover:border-accent-secondary', // Using accent secondary for variety
+        border: 'hover:border-accent-secondary',
         link: '/labs/minimax',
         cta: 'Play Game'
     },
@@ -67,68 +67,77 @@ const labs = [
     }
 ];
 
-const Card = ({ data, index, progress, total }: { data: any, index: number, progress: MotionValue<number>, total: number }) => {
+const RolodexCard = ({ data, index, progress, total }: { data: any, index: number, progress: MotionValue<number>, total: number }) => {
     const ui = useUI();
-    // Animation Logic
-    // Each card occupies a segment of the scroll.
-    // 0 to 1 range total.
-    // index 0: 0.0 - 0.2
-    // index 1: 0.2 - 0.4
-    // etc.
 
-    // We want a stacking card effect or a slide-in replacement.
-    // "Card 1 pins, Card 2 slides in to replace it"
+    // Calculate the 'phase' for this card based on scroll progress
+    // We want the card to be 'active' (0deg rotation) when progress is at a specific point
+    const step = 1 / total;
+    const center = step * index;
 
-    // Simple approach: Cards are absolute. Their Y position is determined by scroll.
-    // Start: Y = 100vh (below screen)
-    // Active: Y = 0 (center)
-    // End: Y = 0 (stays there? or moves up -100vh?)
+    // Transform props based on distance from center
+    // Input range: [center - step, center, center + step]
+    // We expand the range slightly to make transitions smoother
 
-    // User requested: "Card 1 pins... Card 2 slides in to replace it"
-    // So Card 1 stays at 0, Card 2 slides over it.
-
-    const rangeStart = index * (1 / total);
-    const nextRangeStart = (index + 1) * (1 / total);
-
-    const scale = useTransform(progress, [nextRangeStart, nextRangeStart + 0.1], [1, 0.9]);
-    const opacity = useTransform(progress, [nextRangeStart, nextRangeStart + 0.1], [1, 0]);
-
-    const dynamicY = useTransform(
-        progress,
-        [rangeStart - 0.15, rangeStart],
-        ['110vh', '0vh']
+    // Rotation: Tilted away when above/below, flat when center
+    const rotateX = useTransform(progress,
+        [center - step * 1.5, center, center + step * 1.5],
+        [45, 0, -45] // Enters from bottom (45deg), flat at center, exits top (-45deg)
     );
 
-    const isFirst = index === 0;
-    const finalY = isFirst ? useTransform(progress, [0, 0.1], ['0vh', '0vh']) : dynamicY;
+    // Opacity: Fades in/out
+    const opacity = useTransform(progress,
+        [center - step, center, center + step],
+        [0.3, 1, 0.3]
+    );
+
+    // Scale: Small when away, full when center
+    const scale = useTransform(progress,
+        [center - step, center, center + step],
+        [0.8, 1, 0.8]
+    );
+
+    // Z-Index: Active card on top
+    // const zIndex = useTransform(progress, [center - 0.1, center, center + 0.1], [0, 10, 0]); // Motion value for z-index tricky, CSS Better?
+    // We'll use a manually calculated z-index shim or just reliance on DOM order + pointer-events
+
+    // Y Position: Moves up the screen
+    // But in a pure sticky setup, we might purely rely on rotation or absolute positioning.
+    // Let's create a "Visual Y" offset to separate them even if they are stacked
+    const y = useTransform(progress,
+        [center - step * 2, center, center + step * 2],
+        ['100%', '0%', '-100%']
+    );
 
     return (
         <motion.div
             style={{
-                y: finalY,
+                rotateX,
                 scale,
                 opacity,
-                zIndex: index
+                y,
+                transformPerspective: 1000,
+                zIndex: index // DOM order usually sufficient if we managing visibility
             }}
-            className={`absolute top-0 w-full max-w-2xl h-[400px] p-8 rounded-2xl border border-line bg-background-primary/95 backdrop-blur-xl shadow-2xl flex flex-col justify-between overflow-hidden ${data.border} transition-colors duration-300`}
+            className={`absolute w-full max-w-3xl h-[400px] p-10 rounded-3xl border border-line bg-background-primary/95 backdrop-blur-xl shadow-2xl flex flex-col justify-between overflow-hidden ${data.border} transition-colors duration-300 origin-center`}
         >
             {/* Background Gradient */}
-            <div className={`absolute top-0 right-0 w-64 h-64 ${data.bg} blur-[80px] rounded-full opacity-20`} />
+            <div className={`absolute top-0 right-0 w-80 h-80 ${data.bg} blur-[100px] rounded-full opacity-30`} />
 
             <div className="relative z-10">
-                <div className="flex items-start justify-between mb-6">
-                    <div className={`p-4 rounded-xl ${data.bg} ${data.color} text-3xl`}>
+                <div className="flex items-start justify-between mb-8">
+                    <div className={`p-5 rounded-2xl ${data.bg} ${data.color} text-4xl`}>
                         {data.icon}
                     </div>
                     <div className="text-right">
-                        <span className="text-xs font-bold uppercase tracking-widest text-text-secondary opacity-50">Lab {index + 1}</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-text-secondary opacity-50">Experiment 0{index + 1}</span>
                     </div>
                 </div>
 
-                <h3 className="text-3xl font-bold mb-2 text-text-primary">{data.title}</h3>
-                <p className={`text-sm font-medium mb-6 ${data.color}`}>{data.subtitle}</p>
+                <h3 className="text-4xl font-bold mb-3 text-text-primary">{data.title}</h3>
+                <p className={`text-sm font-bold uppercase tracking-wider mb-6 ${data.color}`}>{data.subtitle}</p>
 
-                <p className="text-text-secondary text-lg leading-relaxed max-w-md">
+                <p className="text-text-secondary text-xl leading-relaxed max-w-xl">
                     {data.description}
                 </p>
             </div>
@@ -137,7 +146,7 @@ const Card = ({ data, index, progress, total }: { data: any, index: number, prog
                 {data.link ? (
                     <Link
                         to={data.link}
-                        className={`group inline-flex items-center space-x-2 font-bold ${data.color} hover:opacity-80 transition-opacity`}
+                        className={`group inline-flex items-center space-x-3 text-lg font-bold ${data.color} hover:opacity-80 transition-opacity`}
                     >
                         <span>{data.cta}</span>
                         <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -145,7 +154,7 @@ const Card = ({ data, index, progress, total }: { data: any, index: number, prog
                 ) : (
                     <button
                         onClick={() => data.action && data.action(ui)}
-                        className={`group inline-flex items-center space-x-2 font-bold ${data.color} hover:opacity-80 transition-opacity`}
+                        className={`group inline-flex items-center space-x-3 text-lg font-bold ${data.color} hover:opacity-80 transition-opacity`}
                     >
                         <span>{data.cta}</span>
                         <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -157,38 +166,35 @@ const Card = ({ data, index, progress, total }: { data: any, index: number, prog
 };
 
 const LabsShowcase: React.FC = () => {
-    const targetRef = useRef<HTMLDivElement>(null);
+    const container = useRef(null);
     const { scrollYProgress } = useScroll({
-        target: targetRef,
-        offset: ["start start", "end end"]
+        target: container,
+        offset: ['start start', 'end end']
     });
 
     return (
-        <section className="relative bg-background-secondary/30">
-            {/* Height determines scroll length */}
-            <div ref={targetRef} className="h-[300vh] relative">
-                {/* Sticky Container */}
-                <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
+        <section ref={container} className="relative bg-background-secondary/30 pb-20 mt-20">
+            {/* Height determines scroll length - longer for smoother rolodex */}
+            <div className="h-[400vh] relative">
+
+                <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden perspective-container">
 
                     {/* Header */}
-                    <motion.div
-                        style={{ opacity: useTransform(scrollYProgress, [0, 0.1], [1, 0]) }}
-                        className="absolute top-20 z-0 text-center"
-                    >
-                        <h2 className="text-xl font-bold text-text-primary flex items-center justify-center gap-2 mb-2">
+                    <div className="absolute top-10 z-20 text-center">
+                        <h2 className="text-3xl font-bold text-text-primary flex items-center justify-center gap-3 mb-4">
                             <FiTerminal className="text-accent-primary" />
-                            Engineering Labs <span className="px-2 py-0.5 rounded-full bg-accent-primary text-[10px] text-white uppercase tracking-wider">Beta</span>
+                            Engineering Labs <span className="px-3 py-1 rounded-full bg-accent-primary text-xs text-white uppercase tracking-wider">Beta</span>
                         </h2>
-                        <p className="text-sm text-text-secondary">Scroll to explore experiments</p>
-                    </motion.div>
+                        <p className="text-lg text-text-secondary">Scroll to cycle through experiments</p>
+                    </div>
 
-                    {/* Cards Container */}
-                    <div className="relative w-full max-w-2xl h-[400px]">
-                        {labs.map((lab, index) => (
-                            <Card
-                                key={lab.id}
+                    {/* Rolodex Container use CSS perspective */}
+                    <div className="relative w-full max-w-3xl h-[400px] flex items-center justify-center" style={{ perspective: '1200px', transformStyle: 'preserve-3d' }}>
+                        {labs.map((lab, i) => (
+                            <RolodexCard
+                                key={i}
+                                index={i}
                                 data={lab}
-                                index={index}
                                 progress={scrollYProgress}
                                 total={labs.length}
                             />

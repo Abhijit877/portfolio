@@ -102,6 +102,9 @@
   --line-color: #262626;
   /* Neutral 800 */
 
+  /* Visuals */
+  --header-height: 80px;
+
   color-scheme: dark;
 }
 

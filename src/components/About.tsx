@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useRecruiter } from '../context/RecruiterContext';
 import { FiCpu, FiLayout, FiUsers, FiTarget } from 'react-icons/fi';
 import Tilt from 'react-parallax-tilt';
+import FallingText from './FallingText';
 
 const principles = [
   {
@@ -36,9 +37,14 @@ const About: React.FC = () => {
 
         {/* Story / Text */}
         <div>
-          <h2 className="text-3xl font-bold mb-6">How I Build Software</h2>
+          <h2 className="text-3xl font-bold mb-6">
+            <FallingText content="How I Build Software" delay={0.2} splitBy="char" />
+          </h2>
           <p className="text-text-secondary mb-6 leading-relaxed">
-            Beyond just writing code, I engineer solutions. My approach to frontend development is grounded in computer science fundamentals and modern design patterns.
+            <FallingText
+              content="Beyond just writing code, I engineer solutions. My approach to frontend development is grounded in computer science fundamentals and modern design patterns."
+              delay={0.4}
+            />
           </p>
           <p className="text-text-secondary mb-8 leading-relaxed">
             I don't just "make it work"—I make it scalable, maintainable, and delightful to use. Whether it's a complex dashboard or a landing page, I bring the same level of engineering rigor.

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRecruiter } from '../context/RecruiterContext';
+import FallingText from './FallingText';
 
 const experience = [
   {
@@ -25,7 +26,16 @@ const Experience: React.FC = () => {
   return (
     <section className="py-20 bg-background-primary overflow-hidden">
       <div className="container mx-auto px-6">
-        <h2 className="text-3xl font-bold mb-12 text-center md:text-left">Work Experience</h2>
+        <div className="mb-12 text-center md:text-left">
+          <div className="text-3xl font-bold">
+            <FallingText
+              content="Work Experience"
+              highlightWords={["Work", "Experience"]}
+              splitBy="char"
+              delay={0.2}
+            />
+          </div>
+        </div>
 
         <div className="relative border-l-2 border-line ml-4 md:ml-12 space-y-12">
           {experience.map((job, index) => (

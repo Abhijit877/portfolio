@@ -1,15 +1,15 @@
 import React, { useRef, useMemo, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Text, Float, Line, PerspectiveCamera, Stars, Trail, Sphere } from '@react-three/drei';
+import { Text, Float, Line, PerspectiveCamera, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 // import { EffectComposer, Bloom } from '@react-three/postprocessing'; // Disabling for stability check
-import gsap from 'gsap';
+
 
 // --- Configuration ---
 
 const NEON_CYAN = '#00f3ff';
 const NEON_PURPLE = '#bc13fe';
-const NEON_GREEN = '#0aff0a';
+
 
 // Tier Z-Positions (Depth)
 const TIER_3_Z = 2;   // Client (Front)
@@ -84,7 +84,7 @@ const SystemNode = ({ data }: { data: NodeData }) => {
         }
     }, [data.type]);
 
-    useFrame((state, delta) => {
+    useFrame((_state, delta) => {
         if (meshRef.current) {
             // Ambient Motion
             meshRef.current.rotation.y += delta * (data.tier === 2 ? 0.5 : 0.2);
@@ -153,7 +153,7 @@ const TraceParticle = ({ path, color, delay, duration }: any) => {
     const [active, setActive] = useState(false);
 
     // Simple time-based animation using useFrame
-    useFrame((state, delta) => {
+    useFrame((_state, delta) => {
         if (!active) {
             // Check if it's time to start (simplest way: random or just cycle?)
             // We'll rely on parent to mount us or just run forever?

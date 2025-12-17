@@ -13,6 +13,7 @@ import TypingTest from './pages/TypingTest';
 import MarkdownConverter from './pages/MarkdownConverter';
 import Assistant from './pages/Assistant';
 
+
 function App() {
   return (
     <ThemeProvider>
@@ -33,6 +34,7 @@ function App() {
                   <Route path="/labs/converter" element={<DocumentConverter />} />
                   <Route path="/labs/typing-test" element={<TypingTest />} />
                   <Route path="/labs/markdown" element={<MarkdownConverter />} />
+
                 </Routes>
               </Suspense>
               <Footer />

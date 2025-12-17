@@ -1,361 +1,278 @@
-import React, { useReducer, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiCpu, FiRefreshCw, FiActivity, FiTarget, FiAlertTriangle, FiCode, FiPlay } from 'react-icons/fi';
+import { FiMonitor, FiRotateCcw, FiActivity, FiTarget, FiZap, FiClock, FiAlertTriangle } from 'react-icons/fi';
+import LabLayout from '../components/LabLayout';
 
-// Sample code snippets for testing
-const CODE_SNIPPETS = [
-    `const fibonacci = (n) => {
-  if (n <= 1) return n;
-  return fibonacci(n - 1) + fibonacci(n - 2);
-};`,
-    `function binarySearch(arr, target) {
-  let left = 0;
-  let right = arr.length - 1;
-  while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
-    if (arr[mid] === target) return mid;
-  }
-  return -1;
-}`,
-    `useEffect(() => {
-  const handleResize = () => setWidth(window.innerWidth);
-  window.addEventListener('resize', handleResize);
-  return () => window.removeEventListener('resize', handleResize);
-}, []);`
+// Python code snippets for the test
+const SNIPPETS = [
+    `def binary_search(arr, target):
+    low = 0
+    high = len(arr) - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1`,
+    `class NeuralNetwork:
+    def __init__(self, layers):
+        self.layers = layers
+        self.weights = [np.random.randn(y, x) for x, y in zip(layers[:-1], layers[1:])]
+        self.biases = [np.random.randn(y, 1) for y in layers[1:]]
+
+    def feedforward(self, a):
+        for b, w in zip(self.biases, self.weights):
+            a = sigmoid(np.dot(w, a) + b)
+        return a`,
+    `def quicksort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + middle + quicksort(right)`
 ];
 
-interface State {
-    status: 'idle' | 'running' | 'finished';
-    snippetIndex: number;
-    userInput: string;
-    startTime: number | null;
-    wpm: number;
-    accuracy: number;
-    errors: number;
-    isFocused: boolean;
-}
-
-type Action =
-    | { type: 'START' }
-    | { type: 'TYPE', payload: string }
-    | { type: 'RESET' }
-    | { type: 'TICK', payload: number }
-    | { type: 'SET_FOCUS', payload: boolean };
-
-const initialState: State = {
-    status: 'idle',
-    snippetIndex: 0,
-    userInput: '',
-    startTime: null,
-    wpm: 0,
-    accuracy: 100,
-    errors: 0,
-    isFocused: false
-};
-
-const typingReducer = (state: State, action: Action): State => {
-    switch (action.type) {
-        case 'START':
-            return {
-                ...state,
-                status: 'running',
-                startTime: Date.now(),
-                userInput: '',
-                errors: 0,
-                wpm: 0,
-                accuracy: 100
-            };
-        case 'TYPE':
-            if (state.status === 'finished') return state;
-
-            const input = action.payload;
-            const targetText = CODE_SNIPPETS[state.snippetIndex];
-
-            // Calculate errors
-            let errors = 0;
-            for (let i = 0; i < input.length; i++) {
-                if (input[i] !== targetText[i]) errors++;
-            }
-
-            // Check completion
-            const isFinished = input.length === targetText.length;
-
-            return {
-                ...state,
-                userInput: input,
-                errors,
-                status: isFinished ? 'finished' : state.status
-            };
-        case 'TICK':
-            if (state.status !== 'running' || !state.startTime) return state;
-
-            const timeElapsedMin = (action.payload - state.startTime) / 60000;
-            const wordCount = state.userInput.length / 5;
-            const wpm = timeElapsedMin > 0 ? Math.round(wordCount / timeElapsedMin) : 0;
-            const accuracy = state.userInput.length > 0
-                ? Math.round(((state.userInput.length - state.errors) / state.userInput.length) * 100)
-                : 100;
-
-            return {
-                ...state,
-                wpm,
-                accuracy
-            };
-        case 'RESET':
-            return {
-                ...initialState,
-                snippetIndex: (state.snippetIndex + 1) % CODE_SNIPPETS.length
-            };
-        case 'SET_FOCUS':
-            return {
-                ...state,
-                isFocused: action.payload
-            };
-        default:
-            return state;
-    }
-};
-
-const MetricCard = ({ icon, label, value, unit, color }: { icon: any, label: string, value: number, unit?: string, color: string }) => (
-    <motion.div
-        layout
-        className="bg-background-secondary border border-line p-5 rounded-xl flex items-center justify-between shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
-    >
-        <div className={`absolute top-0 right-0 p-8 opacity-5 ${color} scale-150 transform translate-x-4 -translate-y-4 rounded-full`}></div>
-        <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-1">{label}</p>
-            <div className="flex items-baseline gap-1">
-                <motion.span
-                    key={value}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`text-4xl font-bold ${color.replace('bg-', 'text-')}`}
-                >
-                    {value}
-                </motion.span>
-                {unit && <span className="text-sm text-text-secondary font-medium">{unit}</span>}
-            </div>
-        </div>
-        <div className={`p-3 rounded-lg ${color} bg-opacity-10 text-xl ${color.replace('bg-', 'text-')}`}>
-            {icon}
-        </div>
-    </motion.div>
-);
-
 const TypingTest: React.FC = () => {
-    const [state, dispatch] = useReducer(typingReducer, initialState);
+    const [snippet, setSnippet] = useState('');
+    const [input, setInput] = useState('');
+    const [startTime, setStartTime] = useState<number | null>(null);
+    const [wpm, setWpm] = useState(0);
+    const [accuracy, setAccuracy] = useState(100);
+    const [errors, setErrors] = useState(0);
+    const [isFinished, setIsFinished] = useState(false);
+    const [isActive, setIsActive] = useState(false);
+
+    // Timer ref for accurate intervals
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
-    // Timer effect
     useEffect(() => {
-        let interval: ReturnType<typeof setInterval>;
-        if (state.status === 'running') {
-            interval = setInterval(() => {
-                dispatch({ type: 'TICK', payload: Date.now() });
-            }, 100);
+        resetTest();
+    }, []);
+
+    const resetTest = () => {
+        const randomSnippet = SNIPPETS[Math.floor(Math.random() * SNIPPETS.length)];
+        setSnippet(randomSnippet);
+        setInput('');
+        setStartTime(null);
+        setWpm(0);
+        setAccuracy(100);
+        setErrors(0);
+        setIsFinished(false);
+        setIsActive(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+        if (inputRef.current) inputRef.current.focus();
+    };
+
+    const calculateStats = (currentInput: string) => {
+        if (!startTime) return;
+
+        const timeElapsedMin = (Date.now() - startTime) / 60000;
+        const wordsTyped = currentInput.length / 5;
+        const currentWpm = Math.round(wordsTyped / timeElapsedMin) || 0;
+
+        // Calculate errors
+        let currentErrors = 0;
+        for (let i = 0; i < currentInput.length; i++) {
+            if (currentInput[i] !== snippet[i]) currentErrors++;
         }
-        return () => clearInterval(interval);
-    }, [state.status]);
+
+        const currentAccuracy = Math.max(0, Math.round(((currentInput.length - currentErrors) / currentInput.length) * 100));
+
+        setWpm(currentWpm);
+        setErrors(currentErrors);
+        setAccuracy(isNaN(currentAccuracy) ? 100 : currentAccuracy);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const val = e.target.value;
-        if (state.status === 'idle') {
-            dispatch({ type: 'START' });
+
+        // Start timer on first keystroke
+        if (!isActive && val.length === 1) {
+            setIsActive(true);
+            setStartTime(Date.now());
+            timerRef.current = setInterval(() => {
+                // Update WIP stats periodically if needed, or just rely on keystrokes
+                // For WPM we need real-time updates even if not typing
+            }, 1000);
         }
-        dispatch({ type: 'TYPE', payload: val });
+
+        setInput(val);
+        calculateStats(val);
+
+        if (val === snippet) {
+            setIsFinished(true);
+            setIsActive(false);
+            if (timerRef.current) clearInterval(timerRef.current);
+        }
     };
 
-    const handleReset = () => {
-        dispatch({ type: 'RESET' });
-        setTimeout(() => inputRef.current?.focus(), 100);
-    };
+    // Render Logic for characters
+    const renderCharacter = (char: string, index: number) => {
+        const inputChar = input[index];
+        let className = "text-gray-500"; // Default (future)
 
-    const targetText = CODE_SNIPPETS[state.snippetIndex];
-    const lines = targetText.split('\n');
+        if (index < input.length) {
+            if (inputChar === char) {
+                className = "text-emerald-400"; // Correct
+            } else {
+                className = "text-red-400 bg-red-500/20"; // Incorrect
+            }
+        } else if (index === input.length) {
+            className = "text-indigo-400 border-b-2 border-indigo-500 animate-pulse"; // Cursor
+        }
 
-    const renderLine = useCallback((line: string, lineIndex: number, globalIndex: number) => {
         return (
-            <div key={lineIndex} className="flex">
-                <span className="w-8 mr-4 text-right text-text-secondary opacity-30 select-none text-sm leading-relaxed font-mono">
-                    {lineIndex + 1}
-                </span>
-                <span className="flex-1 font-mono text-lg leading-relaxed whitespace-pre font-medium">
-                    {line.split('').map((char, charIndex) => {
-                        const currentIndex = globalIndex + charIndex;
-                        const userChar = state.userInput[currentIndex];
-
-                        let className = "transition-all duration-75 ";
-
-                        if (currentIndex === state.userInput.length) {
-                            // Cursor
-                            return (
-                                <span key={charIndex} className="relative">
-                                    <span className="absolute -left-[1px] -top-1 w-[2px] h-6 bg-accent-primary animate-pulse z-10"></span>
-                                    <span className="opacity-50 text-text-secondary">{char}</span>
-                                </span>
-                            );
-                        } else if (userChar === undefined) {
-                            className += "text-text-secondary opacity-40";
-                        } else if (userChar === char) {
-                            className += "text-green-400 opacity-100"; // Bright Green for correct
-                        } else {
-                            className += "text-red-400 bg-red-500/10 border-b border-red-500 rounded-sm"; // Red for error
-                        }
-
-                        return (
-                            <span key={charIndex} className={className}>
-                                {char}
-                            </span>
-                        );
-                    })}
-                </span>
-            </div>
+            <span key={index} className={className}>{char}</span>
         );
-    }, [state.userInput]);
-
-    // Calculate global indices for line rendering
-    let currentGlobalIndex = 0;
-    const lineElements = lines.map((line, index) => {
-        const el = renderLine(line, index, currentGlobalIndex);
-        currentGlobalIndex += line.length + 1; // +1 for newline
-        return el;
-    });
+    };
 
     return (
-        <div className="min-h-screen pt-24 pb-12 px-6 bg-background-primary transition-colors duration-300">
-            <div className="container mx-auto max-w-6xl">
+        <LabLayout
+            title="Speed Coder"
+            description="Syntax Proficiency Test"
+            actions={
+                <button
+                    onClick={resetTest}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-medium text-gray-300"
+                >
+                    <FiRotateCcw /> Reset
+                </button>
+            }
+            className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 lg:p-8 w-full max-w-7xl mx-auto"
+        >
+            {/* HUD - Top Bar (Mobile) or Left Col (Desktop) */}
+            <div className="lg:col-span-3 flex flex-col gap-6 order-1">
+                {/* Primary Stats Card */}
+                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl flex flex-col gap-6">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                        <FiActivity /> Live Telemetry
+                    </h3>
 
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row items-end justify-between gap-6 mb-12">
-                    <div>
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-primary/10 text-accent-primary text-sm font-medium mb-3"
-                        >
-                            <FiCpu /> Engineering Lab #4
-                        </motion.div>
-                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-text-secondary">
-                            Advanced Typing Test
-                        </h1>
+                    {/* WPM Meter */}
+                    <div className="relative flex flex-col items-center justify-center py-6 bg-gradient-to-b from-indigo-500/10 to-transparent rounded-xl border border-indigo-500/20">
+                        <div className="text-5xl font-mono font-bold text-indigo-400 tabular-nums">
+                            {wpm}
+                        </div>
+                        <div className="text-xs text-indigo-300/70 font-bold tracking-widest mt-1">WPM</div>
                     </div>
 
-                    {/* Metrics Dashboard */}
-                    <div className="grid grid-cols-3 gap-4 w-full md:w-auto">
-                        <MetricCard
-                            icon={<FiActivity />}
-                            label="Speed"
-                            value={state.wpm}
-                            unit="WPM"
-                            color="bg-blue-500"
-                        />
-                        <MetricCard
-                            icon={<FiTarget />}
-                            label="Accuracy"
-                            value={state.accuracy}
-                            unit="%"
-                            color="bg-green-500"
-                        />
-                        <MetricCard
-                            icon={<FiAlertTriangle />}
-                            label="Errors"
-                            value={state.errors}
-                            color="bg-red-500"
-                        />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 bg-white/5 rounded-xl border border-white/5 flex flex-col items-center">
+                            <div className={`text-2xl font-bold font-mono ${accuracy < 90 ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                                {accuracy}%
+                            </div>
+                            <div className="text-[10px] text-gray-500 uppercase mt-1">Accuracy</div>
+                        </div>
+                        <div className="p-3 bg-white/5 rounded-xl border border-white/5 flex flex-col items-center">
+                            <div className={`text-2xl font-bold font-mono ${errors > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                                {errors}
+                            </div>
+                            <div className="text-[10px] text-gray-500 uppercase mt-1">Errors</div>
+                        </div>
                     </div>
                 </div>
 
-                {/* IDE Container */}
-                <motion.div
-                    layout
-                    className={`relative bg-[#0d0d0d] rounded-2xl overflow-hidden shadow-2xl border transition-all duration-300 ${state.isFocused ? 'border-accent-primary shadow-[0_0_30px_-5px_var(--accent-primary)]' : 'border-line'}`}
-                >
-                    {/* IDE Header */}
-                    <div className="flex items-center justify-between px-4 py-3 bg-[#1a1a1a] border-b border-white/5">
-                        <div className="flex items-center gap-2">
-                            <div className="flex gap-2 mr-4">
-                                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-1 rounded bg-white/5 text-xs font-mono text-text-secondary">
-                                <FiCode /> <span>snippet_{state.snippetIndex + 1}.js</span>
-                            </div>
-                        </div>
-                        <div className="text-xs text-text-secondary font-medium uppercase tracking-wider">
-                            {state.status === 'idle' && 'Ready to Start'}
-                            {state.status === 'running' && <span className="text-accent-primary animate-pulse">● Recording</span>}
-                            {state.status === 'finished' && <span className="text-green-500">✓ Completed</span>}
+                {/* Instructions */}
+                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl hidden lg:block">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4">
+                        <FiZap /> Objectives
+                    </h3>
+                    <ul className="space-y-3 text-xs text-gray-400 leading-relaxed">
+                        <li className="flex gap-2">
+                            <FiTarget className="text-indigo-400 shrink-0 mt-0.5" />
+                            <span>Type the code snippet exactly as shown. Indentation matters.</span>
+                        </li>
+                        <li className="flex gap-2">
+                            <FiClock className="text-indigo-400 shrink-0 mt-0.5" />
+                            <span>Timer starts on the first keystroke.</span>
+                        </li>
+                        <li className="flex gap-2">
+                            <FiAlertTriangle className="text-yellow-400 shrink-0 mt-0.5" />
+                            <span>Mistakes lower your overall accuracy score.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {/* Typing Area - Center/Right */}
+            <div className="lg:col-span-9 order-2 flex flex-col h-full min-h-[500px]">
+                <div className="flex-1 rounded-2xl bg-[#080808] border border-white/10 shadow-2xl relative overflow-hidden flex flex-col group">
+
+                    {/* Window Controls Decoration */}
+                    <div className="h-10 bg-white/5 border-b border-white/5 flex items-center px-4 gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500/50" />
+                        <div className="ml-auto text-xs font-mono text-gray-500 flex items-center gap-2">
+                            <FiMonitor /> PYTHON_ENV_3.11
                         </div>
                     </div>
 
-                    {/* Code Area */}
-                    <div
-                        className="p-8 min-h-[400px] cursor-text relative group"
-                        onClick={() => inputRef.current?.focus()}
-                    >
-                        {/* Rendered Code */}
-                        <div className="relative z-10 space-y-1">
-                            {lineElements}
-                        </div>
+                    {/* Code Container */}
+                    <div className="flex-1 relative p-8 font-mono text-base md:text-lg leading-relaxed overflow-auto custom-scrollbar" onClick={() => inputRef.current?.focus()}>
 
-                        {/* Start Overlay Hint */}
-                        {state.status === 'idle' && !state.isFocused && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[1px] z-20 group-hover:bg-transparent transition-colors pointer-events-none">
-                                <div className="px-6 py-3 bg-accent-primary text-white rounded-full font-bold shadow-lg flex items-center gap-2 animate-bounce">
-                                    <FiPlay /> Click to Focus & Start
-                                </div>
-                            </div>
-                        )}
+                        {/* Rendered Text Overlay */}
+                        <div className="absolute top-8 left-8 right-8 select-none pointer-events-none whitespace-pre-wrap">
+                            {snippet.split('').map((char, index) => renderCharacter(char, index))}
+                        </div>
 
                         {/* Hidden Input */}
                         <textarea
                             ref={inputRef}
-                            value={state.userInput}
+                            value={input}
                             onChange={handleChange}
-                            onFocus={() => dispatch({ type: 'SET_FOCUS', payload: true })}
-                            onBlur={() => dispatch({ type: 'SET_FOCUS', payload: false })}
-                            className="absolute opacity-0 top-0 left-0 w-full h-full cursor-text z-0"
-                            autoFocus
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-text resize-none"
                             spellCheck={false}
                             autoComplete="off"
+                            autoCapitalize="off"
                             autoCorrect="off"
                         />
                     </div>
 
-                    {/* Completion Overlay */}
+                    {/* Result Overlay */}
                     <AnimatePresence>
-                        {state.status === 'finished' && (
+                        {isFinished && (
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="absolute inset-0 bg-black/80 backdrop-blur-sm z-30 flex items-center justify-center"
+                                className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-20"
                             >
-                                <motion.div
-                                    initial={{ scale: 0.9, y: 20 }}
-                                    animate={{ scale: 1, y: 0 }}
-                                    className="bg-[#1a1a1a] border border-white/10 p-10 rounded-2xl text-center max-w-md w-full shadow-2xl"
-                                >
-                                    <div className="w-20 h-20 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
-                                        <FiTarget />
+                                <div className="bg-[#111] border border-white/10 p-8 rounded-2xl shadow-2xl text-center max-w-md w-full mx-4">
+                                    <h2 className="text-3xl font-bold text-white mb-2">Test Complete</h2>
+                                    <p className="text-gray-400 mb-8">System assessment initialized.</p>
+                                    <div className="grid grid-cols-3 gap-4 mb-8">
+                                        <div className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+                                            <div className="text-2xl font-bold text-indigo-400">{wpm}</div>
+                                            <div className="text-[10px] text-gray-500 uppercase">WPM</div>
+                                        </div>
+                                        <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                                            <div className="text-2xl font-bold text-emerald-400">{accuracy}%</div>
+                                            <div className="text-[10px] text-gray-500 uppercase">Accuracy</div>
+                                        </div>
+                                        <div className="p-4 bg-purple-500/10 rounded-xl border border-purple-500/20">
+                                            <div className="text-2xl font-bold text-purple-400">A+</div>
+                                            <div className="text-[10px] text-gray-500 uppercase">Grade</div>
+                                        </div>
                                     </div>
-                                    <h2 className="text-3xl font-bold text-white mb-2">Excellent Run!</h2>
-                                    <p className="text-text-secondary mb-8">
-                                        You typed with <span className="text-white font-bold">{state.accuracy}% accuracy</span> at a speed of <span className="text-white font-bold">{state.wpm} WPM</span>.
-                                    </p>
                                     <button
-                                        onClick={handleReset}
-                                        className="w-full py-4 bg-accent-primary text-white rounded-xl font-bold hover:shadow-lg hover:shadow-accent-primary/20 transition-all flex items-center justify-center gap-2"
+                                        onClick={resetTest}
+                                        className="w-full py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors"
                                     >
-                                        <FiRefreshCw /> Try Next Snippet
+                                        New Snippet
                                     </button>
-                                </motion.div>
+                                </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </motion.div>
+                </div>
             </div>
-        </div>
+        </LabLayout>
     );
 };
 

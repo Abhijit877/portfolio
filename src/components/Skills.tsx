@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import FallingText from './FallingText';
 import { useRecruiter } from '../context/RecruiterContext';
 import {
   SiDotnet,
@@ -77,10 +78,22 @@ const Skills: React.FC = () => {
     <section className="py-20 bg-background-secondary relative overflow-hidden min-h-screen flex items-center">
       <div className="container mx-auto px-6 relative z-10">
         <div className="mb-20 text-center">
-          <h2 className="text-4xl font-bold mb-4">Technical Landscape</h2>
-          <p className="text-text-secondary max-w-2xl mx-auto">
-            A comprehensive view of my specialized stack.
-          </p>
+          <h2 className="text-4xl font-bold mb-4">
+             <FallingText 
+               content="Technical Landscape" 
+               highlightWords={["Technical", "Landscape"]}
+               splitBy="char"
+               delay={0.2}
+               className="justify-center"
+             />
+          </h2>
+          <div className="text-text-secondary max-w-2xl mx-auto">
+            <FallingText 
+              content="A comprehensive view of my specialized stack."
+              delay={0.6}
+              className="justify-center"
+            />
+          </div>
         </div>
 
         {isRecruiterMode ? (

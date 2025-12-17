@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRecruiter } from '../context/RecruiterContext';
-import { useUI } from '../context/UIContext';
+
 import { Link, useLocation } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import {
@@ -13,8 +13,7 @@ import { HERO_SCROLL_THRESHOLD } from '../constants/scrollConfig';
 
 const Header: React.FC = () => {
   const { isRecruiterMode, toggleRecruiterMode } = useRecruiter();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { setChatOpen } = useUI();
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLabsHovered, setIsLabsHovered] = useState(false);
@@ -47,6 +46,7 @@ const Header: React.FC = () => {
     { name: 'Doc Converter', path: '/labs/converter', icon: FiFileText, desc: 'Universal Format Tool' },
     { name: 'Typing Test', path: '/labs/typing-test', icon: FiType, desc: 'Test your speed' },
     { name: 'Markdown Live', path: '/labs/markdown', icon: FiCode, desc: 'Real-time Preview' },
+
   ];
 
   const isLinkActive = (href: string) => {

@@ -1,337 +1,358 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { FiUploadCloud, FiFileText, FiImage, FiDownload, FiCheck, FiCpu, FiActivity, FiLayers, FiAlertCircle } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiDownload, FiCpu, FiUploadCloud, FiFile, FiCheckCircle, FiLoader } from 'react-icons/fi';
-import { jsPDF } from 'jspdf';
+import LabLayout from '../components/LabLayout';
+import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-const DocumentConverter: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'image' | 'html'>('image');
-    const [isConverting, setIsConverting] = useState(false);
+type ConversionType = 'image-to-pdf' | 'html-to-pdf';
+
+/* ----------------------------------------------------------------------------------
+ *  Mock Progress Simulator Hooks
+ * ---------------------------------------------------------------------------------- */
+function useConversionProgress(isConverting: boolean, onComplete: () => void) {
     const [progress, setProgress] = useState(0);
-    const [status, setStatus] = useState<string>('');
-    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [htmlInput, setHtmlInput] = useState<string>('<h1>Hello World</h1>\n<p>This is a sample document.</p>');
-    const htmlPreviewRef = useRef<HTMLDivElement>(null);
+    const [status, setStatus] = useState('');
 
-    const handleImageUpload = (file: File) => {
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setUploadedImage(event.target?.result as string);
-                setStatus('Image loaded ready for conversion');
-            };
-            reader.readAsDataURL(file);
+    useEffect(() => {
+        if (!isConverting) {
+            setProgress(0);
+            setStatus('');
+            return;
+        }
+
+        const stages = [
+            { pct: 10, msg: "Initializing engine..." },
+            { pct: 30, msg: "Parsing assets..." },
+            { pct: 60, msg: "Rendering vector graphics..." },
+            { pct: 85, msg: "Compressing output stream..." },
+            { pct: 100, msg: "Finalizing document..." }
+        ];
+
+        let currentStage = 0;
+        const interval = setInterval(() => {
+            if (currentStage >= stages.length) {
+                clearInterval(interval);
+                onComplete();
+                return;
+            }
+
+            const { pct, msg } = stages[currentStage];
+            setProgress(pct);
+            setStatus(msg);
+            currentStage++;
+        }, 600);
+
+        return () => clearInterval(interval);
+    }, [isConverting, onComplete]);
+
+    return { progress, status };
+}
+
+const DocumentConverter: React.FC = () => {
+    const [activeTab, setActiveTab] = useState<ConversionType>('image-to-pdf');
+    const [dragActive, setDragActive] = useState(false);
+    const [files, setFiles] = useState<File[]>([]);
+    const [htmlInput, setHtmlInput] = useState('');
+    const [isConverting, setIsConverting] = useState(false);
+    const [convertedFileUrl, setConvertedFileUrl] = useState<string | null>(null);
+
+    // --- Actions ---
+    const { progress, status } = useConversionProgress(isConverting, () => {
+        setIsConverting(false);
+        // The actual conversion functions below handle the blob creation separately.
+    });
+
+    // --- Image Logic ---
+    const handleDrag = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.type === "dragenter" || e.type === "dragover") {
+            setDragActive(true);
+        } else if (e.type === "dragleave") {
+            setDragActive(false);
         }
     };
 
-    const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) handleImageUpload(file);
-    };
-
-    const onDragOver = (e: React.DragEvent) => {
+    const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
-        setIsDragging(true);
+        e.stopPropagation();
+        setDragActive(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            setFiles(prev => [...prev, ...newFiles]);
+            setConvertedFileUrl(null); // Reset result
+        }
     };
 
-    const onDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const newFiles = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+            setFiles(prev => [...prev, ...newFiles]);
+            setConvertedFileUrl(null);
+        }
     };
 
-    const onDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-        const file = e.dataTransfer.files?.[0];
-        if (file) handleImageUpload(file);
+    const removeFile = (idx: number) => {
+        setFiles(prev => prev.filter((_, i) => i !== idx));
     };
 
-    const convertImageToPDF = async () => {
-        if (!uploadedImage) return;
-
+    // --- Conversion Handlers (Reused Logic) ---
+    const convertImageToPDF = () => {
+        if (files.length === 0) return;
         setIsConverting(true);
-        setStatus('Reading image data...');
-        setProgress(10);
+        setConvertedFileUrl(null);
 
-        try {
-            const img = new Image();
-            img.src = uploadedImage;
-            await new Promise((resolve) => { img.onload = resolve; });
-
-            setStatus('Calculating dimensions...');
-            setProgress(30);
-            await new Promise(r => setTimeout(r, 500)); // Fake delay for UX
-
+        // Defer actual heavy lifting to let UI show loading state
+        setTimeout(() => {
             const doc = new jsPDF();
-            const imgProps = doc.getImageProperties(uploadedImage);
-            const pdfWidth = doc.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            let processed = 0;
 
-            setStatus('Generating pages...');
-            setProgress(60);
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imgData = e.target?.result as string;
+                    const imgProps = doc.getImageProperties(imgData);
+                    const pdfWidth = doc.internal.pageSize.getWidth();
+                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-            doc.addImage(uploadedImage, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                    if (index > 0) doc.addPage();
+                    doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
 
-            setStatus('Finalizing PDF...');
-            setProgress(90);
-            await new Promise(r => setTimeout(r, 400));
-
-            doc.save('converted-image.pdf');
-
-            setStatus('Download ready!');
-            setProgress(100);
-        } catch (error) {
-            console.error(error);
-            setStatus('Error occurred');
-        } finally {
-            setTimeout(() => {
-                setIsConverting(false);
-                setProgress(0);
-                setStatus('');
-            }, 3000);
-        }
+                    processed++;
+                    if (processed === files.length) {
+                        const blob = doc.output('blob');
+                        const url = URL.createObjectURL(blob);
+                        setConvertedFileUrl(url); // Ready for download
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }, 100);
     };
 
-    const convertHtmlToPDF = async () => {
-        if (!htmlPreviewRef.current) return;
-
+    const convertHTMLToPDF = () => {
+        if (!htmlInput) return;
         setIsConverting(true);
-        setStatus('Parsing DOM structure...');
-        setProgress(20);
+        setConvertedFileUrl(null);
 
-        try {
-            const canvas = await html2canvas(htmlPreviewRef.current, {
-                scale: 2,
-                logging: false,
-                useCORS: true
+        setTimeout(() => {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlInput;
+            document.body.appendChild(tempDiv);
+            tempDiv.style.padding = '20px';
+            tempDiv.style.background = 'white';
+            tempDiv.style.color = 'black';
+            tempDiv.style.width = '800px';
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+
+            html2canvas(tempDiv).then((canvas) => {
+                const imgData = canvas.toDataURL('image/png');
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                const blob = doc.output('blob');
+                const url = URL.createObjectURL(blob);
+                setConvertedFileUrl(url);
+                document.body.removeChild(tempDiv);
             });
-
-            setStatus('Rendering to canvas...');
-            setProgress(50);
-
-            const imgData = canvas.toDataURL('image/png');
-            const doc = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = doc.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-            setStatus('Constructing PDF file...');
-            setProgress(80);
-
-            doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            doc.save('converted-document.pdf');
-
-            setStatus('Download complete!');
-            setProgress(100);
-        } catch (error) {
-            console.error(error);
-            setStatus('Conversion failed');
-        } finally {
-            setTimeout(() => {
-                setIsConverting(false);
-                setProgress(0);
-                setStatus('');
-            }, 3000);
-        }
+        }, 100);
     };
 
     return (
-        <div className="min-h-screen pt-24 pb-12 px-4 md:px-8 bg-background-primary transition-colors duration-300">
-            <div className="container mx-auto max-w-5xl">
-                <header className="mb-12 text-center">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent-primary/10 text-accent-primary text-sm font-semibold mb-6 border border-accent-primary/20"
+        <LabLayout
+            title="Doc Converter"
+            description="Secure Client-Side Document Processing"
+            actions={
+                <div className="flex gap-2 bg-white/5 rounded-lg p-1 border border-white/10">
+                    <button
+                        onClick={() => setActiveTab('image-to-pdf')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 ${activeTab === 'image-to-pdf' ? 'bg-indigo-500/20 text-indigo-300 shadow-sm' : 'text-gray-400 hover:text-white'}`}
                     >
-                        <FiCpu className="animate-pulse" /> Engineering Lab #2
-                    </motion.div>
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-text-primary via-accent-primary to-text-secondary">
-                        Universal Document Converter
-                    </h1>
-                    <p className="text-text-secondary max-w-2xl mx-auto text-lg leading-relaxed">
-                        Professional-grade client-side processing engine. Convert raw binaries and HTML into standardized PDF formats securely in your browser.
-                    </p>
-                </header>
+                        <FiImage /> IMG to PDF
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('html-to-pdf')}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 ${activeTab === 'html-to-pdf' ? 'bg-indigo-500/20 text-indigo-300 shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                    >
+                        <FiFileText /> HTML to PDF
+                    </button>
+                </div>
+            }
+            className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 lg:p-8 w-full max-w-7xl mx-auto"
+        >
+            {/* Input / Drop Zone - Left Side 8 Cols */}
+            <div className="lg:col-span-8 flex flex-col h-full gap-6 order-2 lg:order-1">
 
-                <div className="bg-background-secondary/50 backdrop-blur-xl border border-line rounded-3xl overflow-hidden shadow-2xl relative">
-                    {/* Tabs */}
-                    <div className="flex border-b border-line bg-background-primary/30">
-                        <button
-                            onClick={() => setActiveTab('image')}
-                            className={`flex-1 py-6 text-center font-semibold transition-all relative ${activeTab === 'image' ? 'text-accent-primary' : 'text-text-secondary hover:text-text-primary'}`}
-                        >
-                            Image to PDF
-                            {activeTab === 'image' && (
-                                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 w-full h-1 bg-accent-primary" />
-                            )}
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('html')}
-                            className={`flex-1 py-6 text-center font-semibold transition-all relative ${activeTab === 'html' ? 'text-accent-primary' : 'text-text-secondary hover:text-text-primary'}`}
-                        >
-                            HTML to PDF
-                            {activeTab === 'html' && (
-                                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 w-full h-1 bg-accent-primary" />
-                            )}
-                        </button>
+                {/* Drag & Drop Area */}
+                {activeTab === 'image-to-pdf' ? (
+                    <div
+                        className={`
+                            min-h-[300px] flex-1 rounded-2xl border-2 border-dashed transition-all relative overflow-hidden group
+                            ${dragActive
+                                ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01]'
+                                : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+                            }
+                        `}
+                        onDragEnter={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDragOver={handleDrag}
+                        onDrop={handleDrop}
+                    >
+                        <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+                        />
+
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 transition-opacity">
+                            <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-transform duration-500 ${dragActive ? 'scale-110 bg-indigo-500/20' : 'bg-white/5'}`}>
+                                <FiUploadCloud className={`w-8 h-8 ${dragActive ? 'text-indigo-400' : 'text-gray-400'}`} />
+                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2">
+                                {dragActive ? "Drop files now" : "Drop images here"}
+                            </h3>
+                            <p className="text-sm text-gray-500 max-w-xs text-center">
+                                Support for JPG, PNG, WEBP. High-fidelity client-side rendering.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex-1 flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden min-h-[400px]">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                            <span className="text-xs font-mono text-gray-500">SOURCE CODE</span>
+                            <span className="text-xs font-mono text-gray-500">HTML5</span>
+                        </div>
+                        <textarea
+                            value={htmlInput}
+                            onChange={(e) => setHtmlInput(e.target.value)}
+                            placeholder="<h1>Paste your raw HTML here...</h1>"
+                            className="flex-1 w-full p-6 bg-transparent text-sm font-mono text-gray-300 focus:outline-none resize-none placeholder:text-gray-700"
+                            spellCheck={false}
+                        />
+                    </div>
+                )}
+
+                {/* File Queue (Images only) */}
+                {activeTab === 'image-to-pdf' && files.length > 0 && (
+                    <div className="h-32 rounded-xl border border-white/5 bg-white/[0.01] p-4 flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-white/10">
+                        {files.map((file, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="relative group shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-white/10"
+                            >
+                                <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                                <button
+                                    onClick={() => removeFile(idx)}
+                                    className="absolute top-1 right-1 p-1 rounded-full bg-red-500/80 text-white opacity-0 group-hover:opacity-100 transition-opacity transform hover:scale-110"
+                                >
+                                    <FiAlertCircle size={12} />
+                                </button>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Sidebar Controls - Right 4 cols */}
+            <div className="lg:col-span-4 flex flex-col gap-6 order-1 lg:order-2">
+                {/* Action Card */}
+                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl flex flex-col">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-6">
+                        <FiActivity /> Status Monitor
+                    </h3>
+
+                    {/* Progress Bar */}
+                    <div className="mb-8">
+                        <div className="flex justify-between text-xs mb-2 font-mono">
+                            <span className="text-gray-400">{status || 'IDLE'}</span>
+                            <span className="text-indigo-400">{progress}%</span>
+                        </div>
+                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${progress}%` }}
+                                transition={{ ease: "easeOut" }}
+                            />
+                        </div>
                     </div>
 
-                    <div className="p-8 md:p-12">
-                        <AnimatePresence mode="wait">
-                            {activeTab === 'image' ? (
-                                <motion.div
-                                    key="image"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="space-y-8"
-                                >
-                                    {!uploadedImage ? (
-                                        <div
-                                            onDragOver={onDragOver}
-                                            onDragLeave={onDragLeave}
-                                            onDrop={onDrop}
-                                            className={`border-2 border-dashed rounded-2xl p-16 text-center transition-all duration-300 cursor-pointer group ${isDragging
-                                                ? 'border-accent-primary bg-accent-primary/10 scale-[1.02]'
-                                                : 'border-line hover:border-accent-secondary hover:bg-background-primary/50'
-                                                }`}
-                                        >
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={onFileChange}
-                                                className="hidden"
-                                                id="image-upload"
-                                            />
-                                            <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center gap-6 pointer-events-none">
-                                                <div className={`p-6 rounded-full transition-colors duration-300 ${isDragging ? 'bg-accent-primary text-white' : 'bg-background-primary text-text-secondary group-hover:text-accent-secondary'}`}>
-                                                    <FiUploadCloud className="text-5xl" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <p className="text-xl font-bold text-text-primary">
-                                                        {isDragging ? 'Drop to Upload' : 'Click or Drag Image Here'}
-                                                    </p>
-                                                    <p className="text-sm text-text-secondary">
-                                                        Supports High-Res JPEG, PNG, WEBP
-                                                    </p>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    ) : (
-                                        <div className="grid md:grid-cols-2 gap-8 items-center bg-background-primary/50 p-6 rounded-2xl border border-line">
-                                            <div className="relative group">
-                                                <img src={uploadedImage} alt="Preview" className="w-full h-64 object-contain rounded-lg bg-black/5 dark:bg-white/5" />
-                                                <button
-                                                    onClick={() => setUploadedImage(null)}
-                                                    className="absolute top-2 right-2 p-2 bg-red-500/90 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    ×
-                                                </button>
-                                            </div>
+                    {/* Primary Button */}
+                    <button
+                        onClick={activeTab === 'image-to-pdf' ? convertImageToPDF : convertHTMLToPDF}
+                        disabled={isConverting || (activeTab === 'image-to-pdf' ? files.length === 0 : !htmlInput)}
+                        className={`
+                            py-4 px-6 rounded-xl font-bold flex items-center justify-center gap-3 transition-all
+                            ${isConverting
+                                ? 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/5'
+                                : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg hover:shadow-indigo-500/25 active:scale-95'
+                            }
+                        `}
+                    >
+                        {isConverting ? <FiCpu className="animate-spin" /> : <FiCpu />}
+                        {isConverting ? 'PROCESSING...' : 'INITIALIZE CONVERSION'}
+                    </button>
 
-                                            <div className="space-y-6">
-                                                <div className="space-y-2">
-                                                    <h3 className="text-xl font-bold text-text-primary flex items-center gap-2">
-                                                        <FiCheckCircle className="text-green-500" /> Ready to Convert
-                                                    </h3>
-                                                    <p className="text-text-secondary text-sm">
-                                                        Image loaded into memory buffer. Click below to process.
-                                                    </p>
-                                                </div>
-
-                                                <motion.button
-                                                    whileHover={{ scale: 1.02 }}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    onClick={convertImageToPDF}
-                                                    disabled={isConverting}
-                                                    className="w-full py-4 bg-accent-primary text-white rounded-xl font-bold hover:shadow-[0_0_20px_-5px_var(--accent-primary)] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative"
-                                                >
-                                                    {isConverting ? (
-                                                        <>Processing...</>
-                                                    ) : (
-                                                        <>
-                                                            <FiDownload className="text-xl animate-bounce" />
-                                                            Generate PDF Document
-                                                        </>
-                                                    )}
-                                                </motion.button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="html"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="space-y-6"
+                    {/* Result Card (Appears after Conversion) */}
+                    <AnimatePresence>
+                        {convertedFileUrl && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center"
+                            >
+                                <div className="text-emerald-400 text-sm font-bold mb-3 flex items-center justify-center gap-2">
+                                    <FiCheck /> READY FOR DEPLOYMENT
+                                </div>
+                                <a
+                                    href={convertedFileUrl}
+                                    download={`devfolio-export-${Date.now()}.pdf`}
+                                    className="block w-full py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg font-bold text-sm shadow-lg transition-all"
                                 >
-                                    <div className="grid md:grid-cols-2 gap-6 h-[500px]">
-                                        <div className="flex flex-col space-y-2">
-                                            <label className="text-sm font-semibold text-text-secondary uppercase tracking-wider">HTML Input Scope</label>
-                                            <textarea
-                                                value={htmlInput}
-                                                onChange={(e) => setHtmlInput(e.target.value)}
-                                                className="flex-1 p-4 bg-background-primary border border-line rounded-xl font-mono text-sm leading-relaxed focus:border-accent-primary focus:ring-1 focus:ring-accent-primary focus:outline-none resize-none transition-all placeholder:text-text-secondary/30"
-                                                placeholder="<div>Your HTML here...</div>"
-                                            />
-                                        </div>
-                                        <div className="flex flex-col space-y-2">
-                                            <label className="text-sm font-semibold text-text-secondary uppercase tracking-wider">DOM Preview Render</label>
-                                            <div
-                                                ref={htmlPreviewRef}
-                                                className="flex-1 p-6 bg-white text-black rounded-xl overflow-auto border border-line prose prose-sm max-w-none shadow-inner"
-                                                dangerouslySetInnerHTML={{ __html: htmlInput }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <motion.button
-                                        whileHover={{ scale: 1.01 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        onClick={convertHtmlToPDF}
-                                        disabled={isConverting}
-                                        className="w-full py-4 bg-gradient-to-r from-accent-primary to-accent-secondary text-white rounded-xl font-bold shadow-lg hover:shadow-accent-primary/25 hover:shadow-xl transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                                    >
-                                        {isConverting ? <FiLoader className="animate-spin" /> : <FiFile />}
-                                        {isConverting ? 'Canvas Engine Running...' : 'Render DOM to PDF'}
-                                    </motion.button>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                    DOWNLOAD ARTIFACT
+                                </a>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
 
-                        {/* Progress Overlay */}
-                        <AnimatePresence>
-                            {isConverting && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 20 }}
-                                    className="mt-8 bg-background-primary border border-line rounded-xl p-4 shadow-lg"
-                                >
-                                    <div className="flex justify-between items-center text-sm font-medium mb-2">
-                                        <span className="text-accent-primary flex items-center gap-2">
-                                            <FiLoader className="animate-spin" /> {status}
-                                        </span>
-                                        <span className="text-text-primary">{progress}%</span>
-                                    </div>
-                                    <div className="h-1.5 bg-background-secondary rounded-full overflow-hidden">
-                                        <motion.div
-                                            className="h-full bg-accent-primary"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${progress}%` }}
-                                            transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                                        />
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                {/* Tech Specs */}
+                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl flex-1 hidden lg:flex flex-col">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4">
+                        <FiLayers /> Stack Info
+                    </h3>
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-lg border border-white/5">
+                            <div className="p-2 bg-orange-500/10 text-orange-400 rounded-md"><FiFileText /></div>
+                            <div className="text-xs">
+                                <div className="text-gray-300 font-bold">PDF Engine</div>
+                                <div className="text-gray-600">Client-Side Generation</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-lg border border-white/5">
+                            <div className="p-2 bg-blue-500/10 text-blue-400 rounded-md"><FiImage /></div>
+                            <div className="text-xs">
+                                <div className="text-gray-300 font-bold">Image Processor</div>
+                                <div className="text-gray-600">Lossless Compilation</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 p-3 rounded-lg border border-yellow-500/20 bg-yellow-500/5 text-yellow-200/60 text-xs mt-auto">
+                        <FiAlertCircle className="inline mr-1 -mt-0.5" />
+                        Files are processed locally in your browser memory. No data is sent to external servers.
                     </div>
                 </div>
             </div>
-        </div>
+        </LabLayout>
     );
 };
 

@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiSend, FiUser, FiCpu } from 'react-icons/fi';
+import { FiSend, FiUser, FiCpu, FiActivity, FiSettings, FiClock, FiMessageSquare } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import LabLayout from '../components/LabLayout';
 
 interface Message {
     role: 'user' | 'assistant';
     content: string;
+    timestamp?: Date;
 }
 
 const Assistant: React.FC = () => {
-    const [messages, setMessages] = useState<Message[]>([
-        { role: 'assistant', content: "Hi! I'm your AI portfolio assistant. Ask me anything about Abhijit's projects, skills, or experience." }
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -28,7 +29,7 @@ const Assistant: React.FC = () => {
 
         const userMessage = input.trim();
         setInput('');
-        setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+        setMessages(prev => [...prev, { role: 'user', content: userMessage, timestamp: new Date() }]);
         setIsLoading(true);
 
         try {
@@ -49,7 +50,7 @@ const Assistant: React.FC = () => {
             const decoder = new TextDecoder();
             let assistantMessage = '';
 
-            setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: '', timestamp: new Date() }]);
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -67,75 +68,179 @@ const Assistant: React.FC = () => {
 
         } catch (error) {
             console.error('Chat error:', error);
-            setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an error connecting to the AI service. Please try again later." }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an error connecting to the AI service. Please try again later.", timestamp: new Date() }]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    return (
-        <div className="container mx-auto px-6 pt-32 pb-12 min-h-screen">
-            <div className="max-w-4xl mx-auto h-[70vh] flex flex-col glass-card border-line rounded-2xl overflow-hidden relative">
-                {/* Header */}
-                <div className="p-4 border-b border-line bg-background-secondary/50 backdrop-blur-sm flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-                    <div>
-                        <h1 className="text-xl font-bold text-text-primary">AI Assistant Playground</h1>
-                        <p className="text-xs text-text-secondary">Explore my portfolio with AI</p>
-                    </div>
-                </div>
+    // --- Empty State Component ---
+    const EmptyState = () => (
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 opacity-60">
+            <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center mb-6 animate-pulse-slow">
+                <FiCpu className="w-10 h-10 text-indigo-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Neural Interface Ready</h3>
+            <p className="text-sm text-gray-400 max-w-sm mb-8">
+                Connect to the portfolio knowledge base. Ask about projects, technical skills, or professional experience.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-md">
+                {['Summarize experience', 'List top skills', 'Explain "Gravity Carrom"', 'Contact details'].map((suggestion) => (
+                    <button
+                        key={suggestion}
+                        onClick={() => { setInput(suggestion); }}
+                        className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-indigo-500/30 rounded-xl text-sm text-gray-300 hover:text-indigo-300 transition-all text-left flex items-center justify-between group"
+                    >
+                        <span>{suggestion}</span>
+                        <FiSend className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-indigo-400" />
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
 
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-background-primary/30 scrollbar-thin scrollbar-thumb-background-tertiary">
-                    {messages.map((msg, idx) => (
-                        <div
-                            key={idx}
-                            className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-                        >
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg ${msg.role === 'assistant' ? 'bg-accent-primary text-white' : 'bg-background-tertiary text-text-primary'
-                                }`}>
-                                {msg.role === 'assistant' ? <FiCpu size={18} /> : <FiUser size={18} />}
-                            </div>
-                            <div className={`max-w-[80%] rounded-2xl p-4 text-base leading-relaxed shadow-lg ${msg.role === 'user'
-                                ? 'bg-accent-primary text-white rounded-tr-sm'
-                                : 'bg-background-tertiary text-text-primary rounded-tl-sm'
-                                }`}>
-                                {msg.content}
-                            </div>
-                        </div>
-                    ))}
-                    {isLoading && messages[messages.length - 1].role === 'user' && (
-                        <div className="flex gap-3 items-center text-text-secondary text-sm ml-14">
-                            <span className="w-2 h-2 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <span className="w-2 h-2 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <span className="w-2 h-2 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+    return (
+        <LabLayout
+            title="AI Assistant"
+            description="Interactive Portfolio Intelligence"
+            actions={
+                <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-green-400 font-mono tracking-wider">
+                    <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse shadow-[0_0_8px_currentColor]" />
+                    <span>SYSTEM ONLINE</span>
+                </div>
+            }
+            className="grid grid-cols-1 lg:grid-cols-12 grid-rows-[1fr_auto] lg:grid-rows-1 gap-0 lg:gap-0" // Bento Grid Setup
+        >
+            {/* Main Chat Area - 9 Columns */}
+            <div className="lg:col-span-9 flex flex-col h-full bg-white/[0.01] relative z-10">
+
+                {/* Scrollable Messages */}
+                <div className="flex-1 overflow-y-auto min-h-0 p-4 md:p-8 scrollbar-thin scrollbar-thumb-white/10">
+                    {messages.length === 0 ? (
+                        <EmptyState />
+                    ) : (
+                        <div className="space-y-8 max-w-3xl mx-auto">
+                            <AnimatePresence initial={false}>
+                                {messages.map((msg, idx) => (
+                                    <motion.div
+                                        key={idx}
+                                        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                                        className={`flex gap-4 md:gap-6 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                                    >
+                                        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg border backdrop-blur-md ${msg.role === 'assistant'
+                                            ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                            }`}>
+                                            {msg.role === 'assistant' ? <FiCpu size={18} /> : <FiUser size={18} />}
+                                        </div>
+
+                                        <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} max-w-[80%]`}>
+                                            <div className={`rounded-2xl p-4 md:p-6 text-sm md:text-base leading-relaxed backdrop-blur-md border shadow-sm ${msg.role === 'user'
+                                                ? 'bg-emerald-500/10 border-emerald-500/10 text-emerald-50 rounded-tr-sm'
+                                                : 'bg-white/5 border-white/5 text-gray-200 rounded-tl-sm'
+                                                }`}>
+                                                {msg.content}
+                                            </div>
+                                            {msg.timestamp && (
+                                                <span className="text-[10px] text-gray-600 mt-2 font-mono ml-1 uppercase tracking-widest opacity-60">
+                                                    {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+
+                            {isLoading && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="flex gap-3 items-center ml-14 md:ml-16"
+                                >
+                                    <div className="flex gap-1">
+                                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                    </div>
+                                    <span className="text-xs font-mono text-indigo-400/80 tracking-widest">PROCESSING</span>
+                                </motion.div>
+                            )}
+                            <div ref={messagesEndRef} />
                         </div>
                     )}
-                    <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input */}
-                <form onSubmit={handleSubmit} className="p-4 border-t border-line bg-background-secondary/50 backdrop-blur-sm">
-                    <div className="relative">
+                {/* Input Area - Clean & Glassy */}
+                <div className="p-4 md:p-6 pb-20 md:pb-6 bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 w-full z-20">
+                    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto relative group">
                         <input
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="Ask about my skills, projects, or experience..."
-                            className="w-full bg-background-primary/80 border border-line rounded-xl py-4 pl-6 pr-14 text-text-primary focus:outline-none focus:border-accent-primary transition-all shadow-inner"
+                            placeholder="Ask about Abhijit..."
+                            className="w-full bg-[#111111]/80 border border-white/10 rounded-2xl py-4 pl-6 pr-14 text-indigo-50 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/50 focus:bg-[#151515] transition-all shadow-xl font-mono text-sm backdrop-blur-md text-glow"
                         />
                         <button
                             type="submit"
                             disabled={!input.trim() || isLoading}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-accent-primary text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-secondary transition-colors shadow-md"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-indigo-600/20 text-indigo-400 rounded-xl hover:bg-indigo-600 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                         >
-                            <FiSend size={20} />
+                            <FiSend size={18} />
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
+
+            {/* Sidebar Stats - 3 Columns */}
+            <div className="lg:col-span-3 hidden lg:flex flex-col bg-black/20 border-l border-white/5 backdrop-blur-xl p-6 relative z-20">
+                <div className="mb-8">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4">
+                        <FiActivity /> System Metrics
+                    </h3>
+                    <div className="grid grid-cols-1 gap-3">
+                        <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
+                            <span className="text-xs text-gray-400">Response Time</span>
+                            <span className="text-sm font-mono text-emerald-400 font-bold">~120ms</span>
+                        </div>
+                        <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
+                            <span className="text-xs text-gray-400">Model</span>
+                            <span className="text-sm font-mono text-indigo-400 font-bold">GPT-4o</span>
+                        </div>
+                        <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
+                            <span className="text-xs text-gray-400">Session ID</span>
+                            <span className="text-xs font-mono text-gray-500 truncate w-24">#8F2A-9X</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4">
+                        <FiSettings /> Capabilities
+                    </h3>
+                    <div className="space-y-2">
+                        {['Portfolio Analysis', 'Skill Match', 'Project Insights', 'Code Explanation'].map((item) => (
+                            <div key={item} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all cursor-default group">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                                    <FiMessageSquare size={14} />
+                                </div>
+                                <span className="text-sm text-gray-400 group-hover:text-gray-200">{item}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="mt-auto pt-6 border-t border-white/5">
+                    <div className="flex items-center gap-2 text-xs text-gray-600">
+                        <FiClock className="text-gray-500" />
+                        <span>Session started at {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                </div>
+            </div>
+        </LabLayout>
     );
 };
 
 export default Assistant;
+

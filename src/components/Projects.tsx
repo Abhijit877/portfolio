@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence, useScroll } from 'framer-motion';
+import FallingText from './FallingText';
 import { useRecruiter } from '../context/RecruiterContext';
 import { FiGithub, FiExternalLink, FiCode, FiBox, FiLayers, FiDatabase, FiServer } from 'react-icons/fi';
 
@@ -66,27 +67,108 @@ const caseStudySteps = [
   }
 ];
 
+const ProjectCard = ({ project, index, range, targetScale, progress }: any) => {
+  return (
+    <div className="h-screen flex items-center justify-center sticky top-0">
+      <motion.div
+        className="relative w-full max-w-4xl h-[500px] bg-background-secondary rounded-3xl border border-line overflow-hidden shadow-2xl origin-top"
+        style={{
+          top: `calc(10vh + ${index * 25}px)`,
+          scale: targetScale,
+        }}
+        initial={{ y: 50, opacity: 0 }}
+        whileInView={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+
+        <div className="flex flex-col md:flex-row h-full">
+          {/* Project Info */}
+          <div className="p-10 md:w-1/2 flex flex-col relative z-10">
+            <div className="flex justify-between items-start mb-8">
+              <div className="p-4 bg-accent-primary/10 text-accent-primary rounded-2xl text-3xl">
+                {project.icon}
+              </div>
+            </div>
+
+            <h3 className="text-3xl font-bold mb-4 text-text-primary">{project.name}</h3>
+
+            <p className="text-text-secondary mb-8 text-lg leading-relaxed">
+              {project.description}
+            </p>
+
+            <div className="flex flex-wrap gap-2 mt-auto mb-8">
+              {project.tech.map((t: string) => (
+                <span key={t} className="px-4 py-2 bg-background-primary/50 backdrop-blur-sm text-text-secondary text-sm rounded-full border border-line/50 font-mono">
+                  {t}
+                </span>
+              ))}
+            </div>
+
+            <div className="flex space-x-6 text-text-secondary mt-auto">
+              <a href={project.github} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-accent-primary transition-colors text-sm font-medium uppercase tracking-wider">
+                <FiGithub size={20} />
+                <span>Source Code</span>
+              </a>
+              <a href={project.demo} className="flex items-center gap-2 hover:text-accent-primary transition-colors text-sm font-medium uppercase tracking-wider">
+                <FiExternalLink size={20} />
+                <span>Live Demo</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Project Image / Visual Placeholder */}
+          <div className="md:w-1/2 bg-background-primary/50 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-grid-pattern opacity-20" />
+            <div className="absolute inset-0 flex items-center justify-center text-9xl text-accent-primary/5 font-black select-none transition-transform duration-700 group-hover:scale-110">
+              {index + 1}
+            </div>
+            {/* Decorative Elements */}
+            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-accent-primary/20 rounded-full blur-3xl group-hover:bg-accent-primary/30 transition-all duration-500" />
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 const Projects: React.FC = () => {
   const { isRecruiterMode } = useRecruiter();
   const [activeStep, setActiveStep] = useState(0);
+  const container = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: container,
+    offset: ['start start', 'end end']
+  })
 
   return (
-    <section className="py-20 bg-background-primary transition-colors duration-300">
-      <div className="container mx-auto px-6">
-
+    <section ref={container} className="relative bg-background-primary transition-colors duration-300">
+      <div className="container mx-auto px-6 py-20">
         {/* Header */}
-        <div className="flex justify-between items-end mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.8 }}
+          transition={{ duration: 0.6 }}
+          className="flex justify-between items-end mb-24"
+        >
           <div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">Selected Works</h2>
-            <p className="text-text-secondary max-w-xl text-lg">
-              Delivering enterprise value through Dynamics 365 customizations and PCF component development.
-            </p>
+            <div className="text-3xl md:text-5xl font-bold mb-4">
+              <FallingText
+                content="Selected Works"
+                highlightWords={["Selected", "Works"]}
+                splitBy="char"
+                delay={0.2}
+              />
+            </div>
+            <div className="text-text-secondary max-w-xl text-lg">
+              <FallingText
+                content="Delivering enterprise value through Dynamics 365 customizations and PCF component development."
+                delay={0.6}
+              />
+            </div>
           </div>
-          <a href="https://github.com/Abhijit877" target="_blank" rel="noopener noreferrer" className="hidden md:flex items-center text-accent-primary hover:text-accent-hover font-medium">
-            <span>View Github</span>
-            <FiExternalLink className="ml-2" />
-          </a>
-        </div>
+        </motion.div>
 
         {/* Featured Case Study: Scroll Story */}
         {!isRecruiterMode && (
@@ -134,56 +216,17 @@ const Projects: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={isRecruiterMode ? {} : { opacity: 0, y: 20 }}
-              whileInView={isRecruiterMode ? {} : { opacity: 1, y: 0 }}
-              whileHover={isRecruiterMode ? {} : { y: -5, scale: 1.02 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="group relative bg-background-secondary rounded-2xl overflow-hidden border border-line hover:border-accent-primary/50 transition-all duration-300 hover:shadow-2xl flex flex-col"
-            >
-              {/* Glass Header */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-              <div className="p-8 flex flex-col flex-grow relative z-10">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="p-3 bg-accent-primary/10 text-accent-primary rounded-xl text-2xl group-hover:bg-accent-primary group-hover:text-white transition-colors duration-300">
-                    {project.icon}
-                  </div>
-                  <div className="flex space-x-3 text-text-secondary">
-                    <a href={project.github} className="hover:text-accent-primary transition-colors hover:scale-110 transform duration-200">
-                      <FiGithub size={22} />
-                    </a>
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-bold mb-3 group-hover:text-accent-primary transition-colors">{project.name}</h3>
-
-                <p className="text-text-secondary mb-6 text-sm flex-grow leading-relaxed">
-                  {project.description}
-                </p>
-
-                <div className="flex flex-wrap gap-2 mt-auto">
-                  {project.tech.map(t => (
-                    <span key={t} className="px-3 py-1 bg-background-primary/50 backdrop-blur-sm text-text-secondary text-xs rounded-full border border-line/50 font-mono group-hover:border-accent-primary/30 transition-colors">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          ))
-          }
+        <div className="mt-32 mb-20 text-center">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-accent-primary mb-12">All Projects</h3>
         </div>
 
-        <div className="mt-12 text-center md:hidden">
-          <a href="https://github.com/Abhijit877" target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-accent-primary hover:text-accent-hover font-medium">
-            <span>View All Projects on Github</span>
-            <FiExternalLink className="ml-2" />
-          </a>
+        <div className="relative flex flex-col gap-12 w-full">
+          {
+            projects.map((project, i) => {
+              const targetScale = 1 - ((projects.length - i) * 0.05);
+              return <ProjectCard key={i} index={i} project={project} range={[i * .25, 1]} targetScale={targetScale} progress={scrollYProgress} />
+            })
+          }
         </div>
       </div>
     </section>

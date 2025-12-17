@@ -82,7 +82,7 @@ const HierarchicalDiagram: React.FC = () => {
     // Inline styles for neon glow and aesthetics
     const primaryColor = "#22d3ee"; // Electric Cyan (Tailwind cyan-400)
     const secondaryColor = "#3b82f6"; // Blue
-    const bgColor = "#0f172a"; // Dark Slate
+    // const bgColor = "#0f172a"; // Dark Slate
 
     return (
         <div className="w-full h-full flex items-center justify-center p-4">

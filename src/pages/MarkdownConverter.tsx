@@ -1,171 +1,165 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiCpu, FiCode, FiEye, FiShield, FiCopy, FiCheck } from 'react-icons/fi';
+import { FiEdit3, FiEye, FiDownload, FiCopy, FiCheck, FiTrash2, FiFileText, FiLayout, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+import LabLayout from '../components/LabLayout';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
+const DEFAULT_MARKDOWN = `# Welcome to Markdown Live
+
+## A Real-Time Rendering Engine
+Experince seamless **instant preview** as you type. This editor is optimized for developers who need a quick, distraction-free environment for documentation.
+
+### Features
+- **Live Sync**: Zero latency rendering
+- **Safe HTML**: Sanitized output via DOMPurify
+- **Glocal Access**: Export to .md or .html instantly
+
+\`\`\`javascript
+const devfolio = {
+    version: "2.0.0",
+    theme: "Dark Neumorphism",
+    performance: "Blazing Fast"
+};
+\`\`\`
+
+> "Simplicity is the ultimate sophistication." 
+> — Leonardo da Vinci
+`;
+
 const MarkdownConverter: React.FC = () => {
-    const [markdown, setMarkdown] = useState<string>('# Hello Markdown\n\nStart typing **markdown** on the left to see the *live preview* on the right.\n\n```javascript\nconsole.log("Code blocks supported!");\n```\n\n## Security Feature\nTry pasting a script tag:\n<script>alert("XSS Attack!")</script>\nIt will be sanitized automatically!');
-    const [html, setHtml] = useState<string>('');
-    const [splitPos, setSplitPos] = useState<number>(50); // Percentage
-    const [isDragging, setIsDragging] = useState(false);
-    const [justCopied, setJustCopied] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
+    const [markdown, setMarkdown] = useState(DEFAULT_MARKDOWN);
+    const [html, setHtml] = useState('');
+    const [activeView, setActiveView] = useState<'split' | 'edit' | 'preview'>('split');
+    const [isCopied, setIsCopied] = useState(false);
 
-    // Debounce logic
     useEffect(() => {
-        const timer = setTimeout(async () => {
-            const rawHtml = await marked.parse(markdown);
-            const cleanHtml = DOMPurify.sanitize(rawHtml as string);
-            setHtml(cleanHtml);
-        }, 300);
-
-        return () => clearTimeout(timer);
+        const rawHtml = marked(markdown) as string;
+        setHtml(DOMPurify.sanitize(rawHtml));
     }, [markdown]);
 
-    // Split Pane Logic
-    const handleDragStart = () => setIsDragging(true);
-    const handleDragEnd = () => setIsDragging(false);
-
-    const handleDrag = useCallback((e: MouseEvent) => {
-        if (!isDragging || !containerRef.current) return;
-
-        const containerRect = containerRef.current.getBoundingClientRect();
-        const newPos = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-
-        if (newPos > 20 && newPos < 80) { // Limits
-            setSplitPos(newPos);
-        }
-    }, [isDragging]);
-
-    useEffect(() => {
-        if (isDragging) {
-            window.addEventListener('mousemove', handleDrag);
-            window.addEventListener('mouseup', handleDragEnd);
-        } else {
-            window.removeEventListener('mousemove', handleDrag);
-            window.removeEventListener('mouseup', handleDragEnd);
-        }
-        return () => {
-            window.removeEventListener('mousemove', handleDrag);
-            window.removeEventListener('mouseup', handleDragEnd);
-        }
-    }, [isDragging, handleDrag]);
-
-    const handleCopyHtml = () => {
+    const handleCopy = () => {
         navigator.clipboard.writeText(html);
-        setJustCopied(true);
-        setTimeout(() => setJustCopied(false), 2000);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+    };
+
+    const handleDownload = (type: 'md' | 'html') => {
+        const content = type === 'md' ? markdown : html;
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `document.${type}`;
+        a.click();
+        URL.revokeObjectURL(url);
     };
 
     return (
-        <div className="min-h-screen pt-24 pb-12 px-6 bg-background-primary transition-colors duration-300">
-            <div className="container mx-auto max-w-[1400px]">
-                <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-                    <div>
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-primary/10 text-accent-primary text-sm font-medium mb-2"
-                        >
-                            <FiCpu /> Engineering Lab #5
-                        </motion.div>
-                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-text-primary to-text-secondary">
-                            Live Markdown Editor
-                        </h1>
-                    </div>
-                </header>
-
-                {/* Editor Container */}
-                <div
-                    ref={containerRef}
-                    className="relative flex h-[75vh] bg-background-secondary border border-line rounded-2xl overflow-hidden shadow-2xl select-none"
-                >
-                    {/* Left Pane: Input */}
-                    <div
-                        style={{ width: `${splitPos}%` }}
-                        className="flex flex-col border-r border-line relative"
+        <LabLayout
+            title="Markdown Live"
+            description="Real-Time Rendering Engine"
+            actions={
+                <div className="flex bg-white/5 rounded-lg p-1 border border-white/10">
+                    <button
+                        onClick={() => setActiveView('split')}
+                        className={`p-2 rounded-md transition-all ${activeView === 'split' ? 'bg-indigo-500/20 text-indigo-300' : 'text-gray-400 hover:text-white'}`}
+                        title="Split View"
                     >
-                        <div className="bg-[#1e1e1e] p-3 border-b border-white/10 flex items-center justify-between text-white">
-                            <span className="flex items-center gap-2 text-sm font-bold opacity-80">
-                                <FiCode /> Markdown Source
-                            </span>
-                            <span className="text-xs opacity-50 font-mono">UTF-8</span>
+                        <FiLayout />
+                    </button>
+                    <button
+                        onClick={() => setActiveView('edit')}
+                        className={`p-2 rounded-md transition-all ${activeView === 'edit' ? 'bg-indigo-500/20 text-indigo-300' : 'text-gray-400 hover:text-white'}`}
+                        title="Editor Only"
+                    >
+                        <FiEdit3 />
+                    </button>
+                    <button
+                        onClick={() => setActiveView('preview')}
+                        className={`p-2 rounded-md transition-all ${activeView === 'preview' ? 'bg-indigo-500/20 text-indigo-300' : 'text-gray-400 hover:text-white'}`}
+                        title="Preview Only"
+                    >
+                        <FiEye />
+                    </button>
+                </div>
+            }
+            className="flex flex-col lg:flex-row gap-6 p-6 lg:p-8 h-[calc(100vh-140px)]"
+        >
+            {/* Editor Pane */}
+            {(activeView === 'split' || activeView === 'edit') && (
+                <div className={`flex-1 flex flex-col gap-4 min-w-0 ${activeView === 'split' ? 'lg:w-1/2' : 'w-full'}`}>
+                    <div className="flex items-center justify-between px-2">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                            <FiEdit3 className="text-indigo-400" /> Editor
+                        </span>
+                        <div className="text-xs font-mono text-gray-600">
+                            {markdown.length} chars
                         </div>
+                    </div>
+
+                    <div className="flex-1 rounded-2xl bg-[#080808] border border-white/10 shadow-2xl overflow-hidden relative group hover:border-white/20 transition-colors">
                         <textarea
                             value={markdown}
                             onChange={(e) => setMarkdown(e.target.value)}
-                            className="flex-1 p-6 bg-[#0d0d0d] resize-none focus:outline-none font-mono text-sm leading-relaxed text-gray-300 selection:bg-accent-primary/30"
-                            placeholder="# Type markdown here..."
+                            className="w-full h-full bg-transparent p-6 md:p-8 font-mono text-sm md:text-base text-gray-300 resize-none focus:outline-none focus:bg-white/[0.01] transition-colors leading-relaxed custom-scrollbar"
+                            placeholder="Type markdown here..."
                             spellCheck={false}
                         />
-                    </div>
-
-                    {/* Draggable Divider */}
-                    <div
-                        className={`absolute top-0 bottom-0 w-1 bg-accent-primary cursor-col-resize z-20 hover:scale-x-[4] hover:opacity-100 transition-all ${isDragging ? 'scale-x-[4] opacity-100' : 'opacity-0'}`}
-                        style={{ left: `${splitPos}%`, transform: 'translateX(-50%)' }}
-                        onMouseDown={handleDragStart}
-                    />
-
-                    {/* Right Pane: Preview */}
-                    <div
-                        style={{ width: `${100 - splitPos}%` }}
-                        className="flex flex-col bg-white text-black relative"
-                    >
-                        <div className="bg-gray-100 p-3 border-b border-gray-200 flex items-center justify-between">
-                            <span className="flex items-center gap-2 text-sm font-bold text-gray-600">
-                                <FiEye /> Live Preview
-                            </span>
-                            <div className="flex items-center gap-2">
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold bg-green-100 text-green-700 px-2 py-1 rounded"
-                                >
-                                    <FiShield /> Sanitized
-                                </motion.div>
-                                <button
-                                    onClick={handleCopyHtml}
-                                    className="p-1.5 hover:bg-white rounded-md text-gray-500 hover:text-accent-primary transition-all relative overflow-hidden"
-                                    title="Copy HTML to Clipboard"
-                                >
-                                    <AnimatePresence mode='wait'>
-                                        {justCopied ? (
-                                            <motion.div
-                                                key="check"
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                exit={{ scale: 0 }}
-                                            >
-                                                <FiCheck className="text-green-500" />
-                                            </motion.div>
-                                        ) : (
-                                            <motion.div
-                                                key="copy"
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                exit={{ scale: 0 }}
-                                            >
-                                                <FiCopy />
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </button>
-                            </div>
+                        <div className="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                                onClick={() => setMarkdown('')}
+                                className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                                title="Clear All"
+                            >
+                                <FiTrash2 size={14} />
+                            </button>
+                            <button
+                                onClick={() => handleDownload('md')}
+                                className="p-2 rounded-lg bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                                title="Download .md"
+                            >
+                                <FiDownload size={14} />
+                            </button>
                         </div>
-                        <div
-                            className="flex-1 p-8 overflow-auto prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-code:bg-gray-200 prose-code:text-red-500 prose-code:rounded prose-code:px-1 prose-pre:bg-gray-800 prose-pre:text-gray-100"
-                            dangerouslySetInnerHTML={{ __html: html }}
-                        />
                     </div>
                 </div>
+            )}
 
-                <p className="text-center text-text-secondary text-sm mt-6 opacity-60">
-                    Drag the center divider to resize panes.
-                </p>
-            </div>
-        </div>
+            {/* Preview Pane */}
+            {(activeView === 'split' || activeView === 'preview') && (
+                <div className={`flex-1 flex flex-col gap-4 min-w-0 ${activeView === 'split' ? 'lg:w-1/2' : 'w-full'}`}>
+                    <div className="flex items-center justify-between px-2">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                            <FiEye className="text-emerald-400" /> Preview
+                        </span>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleCopy}
+                                className="text-xs flex items-center gap-1 text-gray-500 hover:text-white transition-colors"
+                            >
+                                {isCopied ? <FiCheck className="text-emerald-400" /> : <FiCopy />}
+                                {isCopied ? 'Copied HTML' : 'Copy HTML'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 rounded-2xl bg-white border border-white/10 shadow-2xl overflow-hidden relative">
+                        {/* Browser Window Bar */}
+                        <div className="absolute top-0 left-0 right-0 h-8 bg-gray-100 border-b border-gray-200 flex items-center px-4 gap-1.5 z-10">
+                            <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                            <div className="mx-auto text-[10px] text-gray-400 font-mono">localhost:3000/preview</div>
+                        </div>
+
+                        <div className="absolute inset-0 top-8 overflow-auto custom-scrollbar p-8 prose prose-slate max-w-none prose-sm md:prose-base prose-headings:font-bold prose-headings:tracking-tight prose-a:text-indigo-600 prose-pre:bg-slate-800 prose-pre:text-slate-50 prose-blockquote:border-l-4 prose-blockquote:border-indigo-500 prose-blockquote:bg-indigo-50 prose-blockquote:py-1 prose-blockquote:px-4">
+                            <div dangerouslySetInnerHTML={{ __html: html }} />
+                        </div>
+                    </div>
+                </div>
+            )}
+        </LabLayout>
     );
 };
 
