@@ -67,7 +67,7 @@ const caseStudySteps = [
   }
 ];
 
-const ProjectCard = ({ project, index, range, targetScale, progress }: any) => {
+const ProjectCard = ({ project, index, targetScale }: any) => {
   return (
     <div className="h-screen flex items-center justify-center sticky top-0">
       <motion.div

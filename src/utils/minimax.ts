@@ -59,7 +59,14 @@ export const minimax = (board: Board, depth: number, isMaximizing: boolean): num
     }
 };
 
-export const getBestMove = (board: Board): number => {
+export const getBestMove = (board: Board, isImpossible: boolean = true): number => {
+    if (!isImpossible) {
+        const availableMoves = board.map((cell, index) => cell === null ? index : null).filter(val => val !== null) as number[];
+        if (availableMoves.length > 0) {
+            return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        }
+    }
+
     let bestScore = -Infinity;
     let move = -1;
 
