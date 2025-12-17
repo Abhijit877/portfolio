@@ -32,3 +32,10 @@ dist-ssr
 *.cert
 github_info.json
 repos.json
+
+# Agent and Temporary Files
+.agent/
+.gemini/
+git_state.txt
+lint_report.txt
+tmp/
