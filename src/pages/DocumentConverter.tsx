@@ -167,16 +167,16 @@ const DocumentConverter: React.FC = () => {
             title="Doc Converter"
             description="Secure Client-Side Document Processing"
             actions={
-                <div className="flex gap-2 bg-white/5 rounded-lg p-1 border border-white/10">
+                <div className="flex gap-2 bg-black/5 dark:bg-white/5 rounded-lg p-1 border border-black/5 dark:border-white/10">
                     <button
                         onClick={() => setActiveTab('image-to-pdf')}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 ${activeTab === 'image-to-pdf' ? 'bg-indigo-500/20 text-indigo-300 shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 ${activeTab === 'image-to-pdf' ? 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300 shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}
                     >
                         <FiImage /> IMG to PDF
                     </button>
                     <button
                         onClick={() => setActiveTab('html-to-pdf')}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 ${activeTab === 'html-to-pdf' ? 'bg-indigo-500/20 text-indigo-300 shadow-sm' : 'text-gray-400 hover:text-white'}`}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-2 ${activeTab === 'html-to-pdf' ? 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300 shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}
                     >
                         <FiFileText /> HTML to PDF
                     </button>
@@ -194,7 +194,7 @@ const DocumentConverter: React.FC = () => {
                             min-h-[300px] flex-1 rounded-2xl border-2 border-dashed transition-all relative overflow-hidden group
                             ${dragActive
                                 ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01]'
-                                : 'border-white/10 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]'
+                                : 'border-line dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] hover:border-indigo-500/50 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]'
                             }
                         `}
                         onDragEnter={handleDrag}
@@ -211,28 +211,28 @@ const DocumentConverter: React.FC = () => {
                         />
 
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 transition-opacity">
-                            <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-transform duration-500 ${dragActive ? 'scale-110 bg-indigo-500/20' : 'bg-white/5'}`}>
-                                <FiUploadCloud className={`w-8 h-8 ${dragActive ? 'text-indigo-400' : 'text-gray-400'}`} />
+                            <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-transform duration-500 ${dragActive ? 'scale-110 bg-indigo-500/20' : 'bg-black/5 dark:bg-white/5'}`}>
+                                <FiUploadCloud className={`w-8 h-8 ${dragActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-text-secondary'}`} />
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2">
+                            <h3 className="text-xl font-bold text-text-primary mb-2">
                                 {dragActive ? "Drop files now" : "Drop images here"}
                             </h3>
-                            <p className="text-sm text-gray-500 max-w-xs text-center">
+                            <p className="text-sm text-text-secondary max-w-xs text-center">
                                 Support for JPG, PNG, WEBP. High-fidelity client-side rendering.
                             </p>
                         </div>
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden min-h-[400px]">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-white/[0.02]">
-                            <span className="text-xs font-mono text-gray-500">SOURCE CODE</span>
-                            <span className="text-xs font-mono text-gray-500">HTML5</span>
+                    <div className="flex-1 flex flex-col rounded-2xl border border-line dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] overflow-hidden min-h-[400px]">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-line dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02]">
+                            <span className="text-xs font-mono text-text-secondary">SOURCE CODE</span>
+                            <span className="text-xs font-mono text-text-secondary">HTML5</span>
                         </div>
                         <textarea
                             value={htmlInput}
                             onChange={(e) => setHtmlInput(e.target.value)}
                             placeholder="<h1>Paste your raw HTML here...</h1>"
-                            className="flex-1 w-full p-6 bg-transparent text-sm font-mono text-gray-300 focus:outline-none resize-none placeholder:text-gray-700"
+                            className="flex-1 w-full p-6 bg-transparent text-sm font-mono text-text-primary focus:outline-none resize-none placeholder:text-text-secondary/50"
                             spellCheck={false}
                         />
                     </div>
@@ -240,13 +240,13 @@ const DocumentConverter: React.FC = () => {
 
                 {/* File Queue (Images only) */}
                 {activeTab === 'image-to-pdf' && files.length > 0 && (
-                    <div className="h-32 rounded-xl border border-white/5 bg-white/[0.01] p-4 flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-white/10">
+                    <div className="h-32 rounded-xl border border-line dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01] p-4 flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-black/10 dark:scrollbar-thumb-white/10">
                         {files.map((file, idx) => (
                             <motion.div
                                 key={idx}
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="relative group shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-white/10"
+                                className="relative group shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-line dark:border-white/10"
                             >
                                 <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
                                 <button
@@ -264,18 +264,18 @@ const DocumentConverter: React.FC = () => {
             {/* Sidebar Controls - Right 4 cols */}
             <div className="lg:col-span-4 flex flex-col gap-6 order-1 lg:order-2">
                 {/* Action Card */}
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl flex flex-col">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-6">
+                <div className="p-6 rounded-2xl bg-white/50 dark:bg-white/[0.02] border border-line dark:border-white/5 backdrop-blur-xl flex flex-col shadow-sm">
+                    <h3 className="text-xs font-bold text-text-secondary uppercase tracking-widest flex items-center gap-2 mb-6">
                         <FiActivity /> Status Monitor
                     </h3>
 
                     {/* Progress Bar */}
                     <div className="mb-8">
                         <div className="flex justify-between text-xs mb-2 font-mono">
-                            <span className="text-gray-400">{status || 'IDLE'}</span>
-                            <span className="text-indigo-400">{progress}%</span>
+                            <span className="text-text-secondary">{status || 'IDLE'}</span>
+                            <span className="text-indigo-500 dark:text-indigo-400">{progress}%</span>
                         </div>
-                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="h-2 w-full bg-black/5 dark:bg-white/5 rounded-full overflow-hidden">
                             <motion.div
                                 className="h-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
                                 initial={{ width: 0 }}
@@ -292,7 +292,7 @@ const DocumentConverter: React.FC = () => {
                         className={`
                             py-4 px-6 rounded-xl font-bold flex items-center justify-center gap-3 transition-all
                             ${isConverting
-                                ? 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/5'
+                                ? 'bg-black/5 dark:bg-white/5 text-text-secondary cursor-not-allowed border border-black/5 dark:border-white/5'
                                 : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg hover:shadow-indigo-500/25 active:scale-95'
                             }
                         `}
@@ -309,7 +309,7 @@ const DocumentConverter: React.FC = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center"
                             >
-                                <div className="text-emerald-400 text-sm font-bold mb-3 flex items-center justify-center gap-2">
+                                <div className="text-emerald-600 dark:text-emerald-400 text-sm font-bold mb-3 flex items-center justify-center gap-2">
                                     <FiCheck /> READY FOR DEPLOYMENT
                                 </div>
                                 <a
@@ -325,28 +325,28 @@ const DocumentConverter: React.FC = () => {
                 </div>
 
                 {/* Tech Specs */}
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl flex-1 hidden lg:flex flex-col">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4">
+                <div className="p-6 rounded-2xl bg-white/50 dark:bg-white/[0.02] border border-line dark:border-white/5 backdrop-blur-xl flex-1 hidden lg:flex flex-col shadow-sm">
+                    <h3 className="text-xs font-bold text-text-secondary uppercase tracking-widest flex items-center gap-2 mb-4">
                         <FiLayers /> Stack Info
                     </h3>
                     <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-lg border border-white/5">
-                            <div className="p-2 bg-orange-500/10 text-orange-400 rounded-md"><FiFileText /></div>
+                        <div className="flex items-center gap-3 p-3 bg-black/[0.02] dark:bg-white/[0.02] rounded-lg border border-line dark:border-white/5">
+                            <div className="p-2 bg-orange-500/10 text-orange-500 dark:text-orange-400 rounded-md"><FiFileText /></div>
                             <div className="text-xs">
-                                <div className="text-gray-300 font-bold">PDF Engine</div>
-                                <div className="text-gray-600">Client-Side Generation</div>
+                                <div className="text-text-primary font-bold">PDF Engine</div>
+                                <div className="text-text-secondary">Client-Side Generation</div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded-lg border border-white/5">
-                            <div className="p-2 bg-blue-500/10 text-blue-400 rounded-md"><FiImage /></div>
+                        <div className="flex items-center gap-3 p-3 bg-black/[0.02] dark:bg-white/[0.02] rounded-lg border border-line dark:border-white/5">
+                            <div className="p-2 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-md"><FiImage /></div>
                             <div className="text-xs">
-                                <div className="text-gray-300 font-bold">Image Processor</div>
-                                <div className="text-gray-600">Lossless Compilation</div>
+                                <div className="text-text-primary font-bold">Image Processor</div>
+                                <div className="text-text-secondary">Lossless Compilation</div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-8 p-3 rounded-lg border border-yellow-500/20 bg-yellow-500/5 text-yellow-200/60 text-xs mt-auto">
+                    <div className="mt-8 p-3 rounded-lg border border-yellow-500/20 bg-yellow-500/5 text-yellow-700 dark:text-yellow-200/60 text-xs mt-auto">
                         <FiAlertCircle className="inline mr-1 -mt-0.5" />
                         Files are processed locally in your browser memory. No data is sent to external servers.
                     </div>

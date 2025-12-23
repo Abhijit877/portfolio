@@ -13,6 +13,9 @@ import DocumentConverter from './pages/DocumentConverter';
 import TypingTest from './pages/TypingTest';
 import MarkdownConverter from './pages/MarkdownConverter';
 import Assistant from './pages/Assistant';
+import Labs from './pages/Labs';
+import ScrollToTop from './components/ScrollToTop';
+import RecruiterMode from './pages/RecruiterMode';
 
 function App() {
   return (
@@ -20,6 +23,7 @@ function App() {
       <RecruiterProvider>
         <UIProvider>
           <Router>
+            <ScrollToTop />
             <LayoutGroup>
               <div className="min-h-screen bg-background-primary text-text-primary transition-colors duration-300 font-sans selection:bg-accent-primary selection:text-white">
                 <Header />
@@ -30,11 +34,13 @@ function App() {
                 }>
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/labs" element={<Labs />} />
                     <Route path="/labs/assistant" element={<Assistant />} />
                     <Route path="/labs/minimax" element={<RoundCrossGame />} />
                     <Route path="/labs/converter" element={<DocumentConverter />} />
                     <Route path="/labs/typing-test" element={<TypingTest />} />
                     <Route path="/labs/markdown" element={<MarkdownConverter />} />
+                    <Route path="/recruiter" element={<RecruiterMode />} />
 
                   </Routes>
                 </Suspense>

@@ -15,10 +15,10 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
 }
 
 const variants: Record<ButtonVariant, string> = {
-    primary: 'bg-accent-gradient text-white border-transparent shadow-[0_0_15px_rgba(139,92,246,0.5)] hover:shadow-[0_0_25px_rgba(139,92,246,0.8)]',
-    secondary: 'bg-transparent border border-gray-300 dark:border-white/20 text-text-secondary dark:text-gray-300 hover:text-text-primary hover:border-accent-primary hover:bg-accent-primary/5 transition-all',
-    project: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-transparent shadow-[0_0_15px_rgba(37,99,235,0.5)] hover:shadow-[0_0_25px_rgba(37,99,235,0.8)]',
-    lab: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-transparent shadow-[0_0_15px_rgba(168,85,247,0.5)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)]'
+    primary: 'bg-accent-gradient text-white border-transparent shadow-[0_4px_14px_0_rgba(124,58,237,0.4)] dark:shadow-[0_4px_14px_0_rgba(124,58,237,0.4)] shadow-lg shadow-violet-500/30 hover:shadow-[0_6px_20px_rgba(124,58,237,0.23)] hover:-translate-y-0.5',
+    secondary: 'bg-white dark:bg-transparent border border-slate-300 dark:border-white/20 text-slate-700 dark:text-gray-300 hover:text-accent-primary hover:border-accent-primary hover:bg-slate-50 dark:hover:bg-accent-primary/10 transition-all shadow-sm hover:shadow-md',
+    project: 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white border-transparent shadow-[0_4px_14px_0_rgba(37,99,235,0.4)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] hover:-translate-y-0.5',
+    lab: 'bg-gradient-to-r from-pink-600 to-rose-600 text-white border-transparent shadow-[0_4px_14px_0_rgba(219,39,119,0.4)] hover:shadow-[0_6px_20px_rgba(219,39,119,0.23)] hover:-translate-y-0.5'
 };
 
 const Button: React.FC<ButtonProps> = ({

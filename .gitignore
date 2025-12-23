@@ -39,3 +39,10 @@ repos.json
 git_state.txt
 lint_report.txt
 tmp/
+
+# Production
+build
+.vercel
+
+# Testing
+coverage

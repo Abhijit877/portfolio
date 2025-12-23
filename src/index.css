@@ -79,30 +79,34 @@
 }
 
 :root {
-  /* GLOBAL TOKENS - LIGHT MODE (Enterprise) */
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F8F9FA;
+  /* GLOBAL TOKENS - LIGHT MODE (Ceramic & Laser) */
+  --bg-primary: #F8FAFC;
+  /* Slate 50 - Cool Porcelain */
+  --bg-secondary: #FFFFFF;
+  /* Pure White - Surface */
   --bg-tertiary: #F1F3F5;
 
-  --text-primary: #1E293B;
-  /* Slate 800 */
-  --text-secondary: #64748B;
-  /* Slate 500 */
-  --text-accent: #2563EB;
-  /* Royal Blue */
+  --text-primary: #0F172A;
+  /* Slate 900 - Deepest Charcoal */
+  --text-secondary: #475569;
+  /* Slate 600 - High Contrast Gray */
+  --text-accent: #6D28D9;
+  /* Violet 700 */
 
-  --accent-primary: #2563EB;
-  /* Royal Blue */
-  --accent-secondary: #1D4ED8;
-  /* Darker Blue */
-  --accent-hover: #1E40AF;
-  --accent-gradient: linear-gradient(135deg, #2563EB, #1D4ED8);
+  --accent-primary: #7C3AED;
+  /* Violet 600 */
+  --accent-secondary: #4F46E5;
+  /* Indigo 600 */
+  --accent-hover: #8B5CF6;
+  /* Violet 500 */
+  --accent-gradient: linear-gradient(to right, #7C3AED, #4F46E5);
 
   --line-color: #E2E8F0;
   /* Slate 200 */
 
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(226, 232, 240, 0.6);
+  /* Slate 200 equivalent */
 
   color-scheme: light;
 }
@@ -111,8 +115,9 @@
   /* GLOBAL TOKENS - DARK MODE (Purple Gradient) */
   --bg-primary: #050505;
   /* Pure Black / Deep Charcoal */
-  --bg-secondary: #0A0A0A;
-  --bg-tertiary: #171717;
+  --bg-secondary: #050505;
+  /* Unified Background */
+  --bg-tertiary: #0A0A0A;
 
   --text-primary: #F5F5F5;
   --text-secondary: #A3A3A3;
@@ -128,7 +133,7 @@
   --line-color: rgba(139, 92, 246, 0.15);
   /* 15% purple opacity */
 
-  --glass-bg: rgba(10, 10, 10, 0.8);
+  --glass-bg: rgba(5, 5, 5, 0.8);
   --glass-border: rgba(139, 92, 246, 0.2);
 
   /* Visuals */
@@ -151,13 +156,15 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 dark:bg-white/5 backdrop-blur-sm border border-black/5 dark:border-white/10;
+    @apply bg-[var(--glass-bg)] backdrop-blur-md border border-[var(--glass-border)];
   }
 
   .glass-card {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    @apply dark:shadow-none;
   }
 
   .blueprint-border {

@@ -115,13 +115,13 @@ const TypingTest: React.FC = () => {
     // Render Logic for characters
     const renderCharacter = (char: string, index: number) => {
         const inputChar = input[index];
-        let className = "text-gray-500"; // Default (future)
+        let className = "text-slate-400 dark:text-gray-500"; // Default (future)
 
         if (index < input.length) {
             if (inputChar === char) {
-                className = "text-emerald-400"; // Correct
+                className = "text-emerald-600 dark:text-emerald-400"; // Correct
             } else {
-                className = "text-red-400 bg-red-500/20"; // Incorrect
+                className = "text-red-600 dark:text-red-400 bg-red-500/10"; // Incorrect
             }
         } else if (index === input.length) {
             className = "text-accent-primary border-b-2 border-accent-primary animate-pulse"; // Cursor
@@ -139,7 +139,7 @@ const TypingTest: React.FC = () => {
             actions={
                 <button
                     onClick={resetTest}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-medium text-gray-300"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-xs font-medium text-text-secondary hover:text-text-primary"
                 >
                     <FiRotateCcw /> Reset
                 </button>
@@ -149,51 +149,51 @@ const TypingTest: React.FC = () => {
             {/* HUD - Top Bar (Mobile) or Left Col (Desktop) */}
             <div className="lg:col-span-3 flex flex-col gap-6 order-1">
                 {/* Primary Stats Card */}
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl flex flex-col gap-6">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                <div className="p-6 rounded-2xl bg-white/50 dark:bg-white/[0.02] border border-line dark:border-white/5 backdrop-blur-xl flex flex-col gap-6 shadow-sm">
+                    <h3 className="text-xs font-bold text-text-secondary uppercase tracking-widest flex items-center gap-2">
                         <FiActivity /> Live Telemetry
                     </h3>
 
                     {/* WPM Meter */}
-                    <div className="relative flex flex-col items-center justify-center py-6 bg-gradient-to-b from-indigo-500/10 to-transparent rounded-xl border border-indigo-500/20">
-                        <div className="text-5xl font-mono font-bold text-indigo-400 tabular-nums">
+                    <div className="relative flex flex-col items-center justify-center py-6 bg-gradient-to-b from-indigo-50 dark:from-indigo-500/10 to-transparent rounded-xl border border-indigo-200 dark:border-indigo-500/20">
+                        <div className="text-5xl font-mono font-bold text-indigo-500 dark:text-indigo-400 tabular-nums">
                             {wpm}
                         </div>
-                        <div className="text-xs text-indigo-300/70 font-bold tracking-widest mt-1">WPM</div>
+                        <div className="text-xs text-indigo-400/80 dark:text-indigo-300/70 font-bold tracking-widest mt-1">WPM</div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-white/5 rounded-xl border border-white/5 flex flex-col items-center">
-                            <div className={`text-2xl font-bold font-mono ${accuracy < 90 ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                        <div className="p-3 bg-black/5 dark:bg-white/5 rounded-xl border border-line dark:border-white/5 flex flex-col items-center">
+                            <div className={`text-2xl font-bold font-mono ${accuracy < 90 ? 'text-yellow-500 dark:text-yellow-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
                                 {accuracy}%
                             </div>
-                            <div className="text-[10px] text-gray-500 uppercase mt-1">Accuracy</div>
+                            <div className="text-[10px] text-text-secondary uppercase mt-1">Accuracy</div>
                         </div>
-                        <div className="p-3 bg-white/5 rounded-xl border border-white/5 flex flex-col items-center">
-                            <div className={`text-2xl font-bold font-mono ${errors > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                        <div className="p-3 bg-black/5 dark:bg-white/5 rounded-xl border border-line dark:border-white/5 flex flex-col items-center">
+                            <div className={`text-2xl font-bold font-mono ${errors > 0 ? 'text-red-500 dark:text-red-400' : 'text-text-secondary'}`}>
                                 {errors}
                             </div>
-                            <div className="text-[10px] text-gray-500 uppercase mt-1">Errors</div>
+                            <div className="text-[10px] text-text-secondary uppercase mt-1">Errors</div>
                         </div>
                     </div>
                 </div>
 
                 {/* Instructions */}
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl hidden lg:block">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4">
+                <div className="p-6 rounded-2xl bg-white/50 dark:bg-white/[0.02] border border-line dark:border-white/5 backdrop-blur-xl hidden lg:block shadow-sm">
+                    <h3 className="text-xs font-bold text-text-secondary uppercase tracking-widest flex items-center gap-2 mb-4">
                         <FiZap /> Objectives
                     </h3>
-                    <ul className="space-y-3 text-xs text-gray-400 leading-relaxed">
+                    <ul className="space-y-3 text-xs text-text-secondary leading-relaxed">
                         <li className="flex gap-2">
-                            <FiTarget className="text-indigo-400 shrink-0 mt-0.5" />
+                            <FiTarget className="text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" />
                             <span>Type the code snippet exactly as shown. Indentation matters.</span>
                         </li>
                         <li className="flex gap-2">
-                            <FiClock className="text-indigo-400 shrink-0 mt-0.5" />
+                            <FiClock className="text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" />
                             <span>Timer starts on the first keystroke.</span>
                         </li>
                         <li className="flex gap-2">
-                            <FiAlertTriangle className="text-yellow-400 shrink-0 mt-0.5" />
+                            <FiAlertTriangle className="text-yellow-500 dark:text-yellow-400 shrink-0 mt-0.5" />
                             <span>Mistakes lower your overall accuracy score.</span>
                         </li>
                     </ul>
@@ -202,14 +202,14 @@ const TypingTest: React.FC = () => {
 
             {/* Typing Area - Center/Right */}
             <div className="lg:col-span-9 order-2 flex flex-col h-full min-h-[500px]">
-                <div className="flex-1 rounded-2xl bg-[#080808] border border-white/10 shadow-2xl relative overflow-hidden flex flex-col group">
+                <div className="flex-1 rounded-2xl bg-slate-50 dark:bg-[#080808] border border-line dark:border-white/10 shadow-2xl relative overflow-hidden flex flex-col group">
 
                     {/* Window Controls Decoration */}
-                    <div className="h-10 bg-white/5 border-b border-white/5 flex items-center px-4 gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
-                        <div className="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500/50" />
-                        <div className="ml-auto text-xs font-mono text-gray-500 flex items-center gap-2">
+                    <div className="h-10 bg-white/80 dark:bg-white/5 border-b border-line dark:border-white/5 flex items-center px-4 gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500/50 dark:bg-red-500/20 border border-red-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500/50 dark:bg-yellow-500/20 border border-yellow-500/50" />
+                        <div className="w-3 h-3 rounded-full bg-emerald-500/50 dark:bg-emerald-500/20 border border-emerald-500/50" />
+                        <div className="ml-auto text-xs font-mono text-text-secondary flex items-center gap-2">
                             <FiMonitor /> PYTHON_ENV_3.11
                         </div>
                     </div>
@@ -241,28 +241,28 @@ const TypingTest: React.FC = () => {
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-20"
+                                className="absolute inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-20"
                             >
-                                <div className="bg-[#111] border border-white/10 p-8 rounded-2xl shadow-2xl text-center max-w-md w-full mx-4">
-                                    <h2 className="text-3xl font-bold text-white mb-2">Test Complete</h2>
-                                    <p className="text-gray-400 mb-8">System assessment initialized.</p>
+                                <div className="bg-white dark:bg-[#111] border border-line dark:border-white/10 p-8 rounded-2xl shadow-2xl text-center max-w-md w-full mx-4">
+                                    <h2 className="text-3xl font-bold text-text-primary mb-2">Test Complete</h2>
+                                    <p className="text-text-secondary mb-8">System assessment initialized.</p>
                                     <div className="grid grid-cols-3 gap-4 mb-8">
-                                        <div className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-                                            <div className="text-2xl font-bold text-indigo-400">{wpm}</div>
-                                            <div className="text-[10px] text-gray-500 uppercase">WPM</div>
+                                        <div className="p-4 bg-indigo-50 Dark:bg-indigo-500/10 rounded-xl border border-indigo-200 dark:border-indigo-500/20">
+                                            <div className="text-2xl font-bold text-indigo-500 dark:text-indigo-400">{wpm}</div>
+                                            <div className="text-[10px] text-text-secondary uppercase">WPM</div>
                                         </div>
-                                        <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                                            <div className="text-2xl font-bold text-emerald-400">{accuracy}%</div>
-                                            <div className="text-[10px] text-gray-500 uppercase">Accuracy</div>
+                                        <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl border border-emerald-200 dark:border-emerald-500/20">
+                                            <div className="text-2xl font-bold text-emerald-500 dark:text-emerald-400">{accuracy}%</div>
+                                            <div className="text-[10px] text-text-secondary uppercase">Accuracy</div>
                                         </div>
-                                        <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                                            <div className="text-2xl font-bold text-blue-400">A+</div>
-                                            <div className="text-[10px] text-gray-500 uppercase">Grade</div>
+                                        <div className="p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-200 dark:border-blue-500/20">
+                                            <div className="text-2xl font-bold text-blue-500 dark:text-blue-400">A+</div>
+                                            <div className="text-[10px] text-text-secondary uppercase">Grade</div>
                                         </div>
                                     </div>
                                     <button
                                         onClick={resetTest}
-                                        className="w-full py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                                        className="w-full py-3 bg-text-primary text-background-primary font-bold rounded-lg hover:bg-text-primary/90 transition-colors"
                                     >
                                         New Snippet
                                     </button>

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRecruiter } from '../context/RecruiterContext';
 import { useUI } from '../context/UIContext';
 
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import MagneticButton from './MagneticButton';
 import {
@@ -21,6 +21,10 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLabsHovered, setIsLabsHovered] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Hide global header on /recruiter route using CSS to maintain component tree stability
+  const isRecruiterRoute = location.pathname === '/recruiter';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -90,8 +94,8 @@ const Header: React.FC = () => {
 
   return (
     <motion.header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled || isMobileMenuOpen || location.pathname !== '/'
-        ? 'glass border-b border-glass-border py-4'
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isRecruiterRoute ? 'hidden' : ''} ${isScrolled || isMobileMenuOpen || location.pathname !== '/'
+        ? 'glass py-4'
         : 'bg-transparent py-6'
         }`}
       initial={{ y: -100 }}
@@ -184,15 +188,14 @@ const Header: React.FC = () => {
                         <Link
                           key={item.name}
                           to={item.path}
-                          className="w-full text-left p-3 rounded-lg hover:bg-white/5 transition-colors flex items-start gap-4 group/item relative overflow-hidden"
+                          onClick={() => setIsLabsHovered(false)}
+                          className="w-full text-left p-3 rounded-lg hover:bg-accent-primary/5 transition-all duration-300 flex items-start gap-4 group/item relative overflow-hidden ring-transparent hover:ring-1 hover:ring-accent-primary/20"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-accent-primary/5 to-transparent opacity-0 group-hover/item:opacity-100 transition-opacity" />
-                          <div className={`p-2 bg-background-tertiary rounded-lg border border-white/5 relative z-10 transition-colors ${location.pathname === item.path ? 'border-accent-primary text-accent-primary' : 'group-hover/item:border-accent-primary/50 text-text-secondary group-hover/item:text-accent-primary'
-                            }`}>
+                          <div className={`p-2 rounded-lg relative z-10 transition-colors duration-300 ${location.pathname === item.path ? 'bg-accent-primary text-white shadow-lg shadow-accent-primary/20' : 'bg-background-tertiary text-text-secondary group-hover/item:text-accent-primary group-hover/item:bg-white/10'}`}>
                             <item.icon size={18} />
                           </div>
                           <div className="relative z-10">
-                            <div className={`font-bold text-sm flex items-center gap-2 ${location.pathname === item.path ? 'text-accent-primary' : 'text-text-primary'
+                            <div className={`font-bold text-sm flex items-center gap-2 transition-colors duration-300 ${location.pathname === item.path ? 'text-accent-primary' : 'text-text-primary group-hover/item:text-accent-primary'
                               }`}>
                               {item.name}
                             </div>
@@ -210,7 +213,11 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-4 pl-4 border-l border-line ml-4">
             {/* Recruiter Toggle */}
             <button
-              onClick={toggleRecruiterMode}
+              onClick={() => {
+                toggleRecruiterMode();
+                if (!isRecruiterMode) navigate('/recruiter');
+                else navigate('/');
+              }}
               className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${isRecruiterMode
                 ? 'bg-accent-primary text-white border-accent-primary shadow-[0_0_15px_rgba(139,92,246,0.3)]'
                 : 'bg-transparent text-text-secondary border-text-secondary hover:border-accent-primary hover:text-accent-primary'
@@ -286,7 +293,12 @@ const Header: React.FC = () => {
 
               <motion.div variants={itemVariants} className="flex items-center justify-between pt-8 border-t border-glass-border pb-10">
                 <button
-                  onClick={() => { toggleRecruiterMode(); setIsMobileMenuOpen(false); }}
+                  onClick={() => {
+                    toggleRecruiterMode();
+                    setIsMobileMenuOpen(false);
+                    if (!isRecruiterMode) navigate('/recruiter');
+                    else navigate('/');
+                  }}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-bold transition-all border ${isRecruiterMode
                     ? 'bg-accent-primary text-white border-accent-primary'
                     : 'bg-transparent text-text-secondary border-text-secondary'

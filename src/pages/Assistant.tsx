@@ -23,13 +23,14 @@ const Assistant: React.FC = () => {
         scrollToBottom();
     }, [messages]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!input.trim() || isLoading) return;
+    const handleSubmit = async (e?: React.FormEvent, manualInput?: string) => {
+        if (e) e.preventDefault();
+        const textToSend = manualInput || input;
 
-        const userMessage = input.trim();
+        if (!textToSend.trim() || isLoading) return;
+
         setInput('');
-        setMessages(prev => [...prev, { role: 'user', content: userMessage, timestamp: new Date() }]);
+        setMessages(prev => [...prev, { role: 'user', content: textToSend, timestamp: new Date() }]);
         setIsLoading(true);
 
         try {
@@ -39,7 +40,7 @@ const Assistant: React.FC = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    messages: [...messages, { role: 'user', content: userMessage }].map(m => ({ role: m.role, content: m.content })),
+                    messages: [...messages, { role: 'user', content: textToSend }].map(m => ({ role: m.role, content: m.content })),
                 }),
             });
 
@@ -78,21 +79,21 @@ const Assistant: React.FC = () => {
     const EmptyState = () => (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-8 opacity-60">
             <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center mb-6 animate-pulse-slow">
-                <FiCpu className="w-10 h-10 text-indigo-400" />
+                <FiCpu className="w-10 h-10 text-indigo-500 dark:text-indigo-400" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Neural Interface Ready</h3>
-            <p className="text-sm text-gray-400 max-w-sm mb-8">
+            <h3 className="text-xl font-bold text-text-primary mb-2">Neural Interface Ready</h3>
+            <p className="text-sm text-text-secondary max-w-sm mb-8">
                 Connect to the portfolio knowledge base. Ask about projects, technical skills, or professional experience.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-md">
                 {['Summarize experience', 'List top skills', 'Explain "Gravity Carrom"', 'Contact details'].map((suggestion) => (
                     <button
                         key={suggestion}
-                        onClick={() => { setInput(suggestion); }}
-                        className="px-4 py-3 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-indigo-500/30 rounded-xl text-sm text-gray-300 hover:text-indigo-300 transition-all text-left flex items-center justify-between group"
+                        onClick={() => handleSubmit(undefined, suggestion)}
+                        className="px-4 py-3 bg-white/5 hover:bg-black/5 dark:hover:bg-white/10 border border-black/5 dark:border-white/5 hover:border-indigo-500/30 rounded-xl text-sm text-text-secondary hover:text-indigo-500 dark:hover:text-indigo-300 transition-all text-left flex items-center justify-between group"
                     >
                         <span>{suggestion}</span>
-                        <FiSend className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-indigo-400" />
+                        <FiSend className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-indigo-500 dark:text-indigo-400" />
                     </button>
                 ))}
             </div>
@@ -104,7 +105,7 @@ const Assistant: React.FC = () => {
             title="AI Assistant"
             description="Interactive Portfolio Intelligence"
             actions={
-                <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-green-400 font-mono tracking-wider">
+                <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-xs text-green-600 dark:text-green-400 font-mono tracking-wider">
                     <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse shadow-[0_0_8px_currentColor]" />
                     <span>SYSTEM ONLINE</span>
                 </div>
@@ -112,10 +113,10 @@ const Assistant: React.FC = () => {
             className="grid grid-cols-1 lg:grid-cols-12 grid-rows-[1fr_auto] lg:grid-rows-1 gap-0 lg:gap-0" // Bento Grid Setup
         >
             {/* Main Chat Area - 9 Columns */}
-            <div className="lg:col-span-9 flex flex-col h-full bg-white/[0.01] relative z-10">
+            <div className="lg:col-span-9 flex flex-col h-full bg-white/50 dark:bg-white/[0.01] relative z-10">
 
                 {/* Scrollable Messages */}
-                <div className="flex-1 overflow-y-auto min-h-0 p-4 md:p-8 scrollbar-thin scrollbar-thumb-white/10">
+                <div className="flex-1 overflow-y-auto min-h-0 p-4 md:p-8 scrollbar-thin scrollbar-thumb-black/10 dark:scrollbar-thumb-white/10">
                     {messages.length === 0 ? (
                         <EmptyState />
                     ) : (
@@ -130,21 +131,21 @@ const Assistant: React.FC = () => {
                                         className={`flex gap-4 md:gap-6 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                                     >
                                         <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg border backdrop-blur-md ${msg.role === 'assistant'
-                                            ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-                                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                            ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20'
+                                            : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
                                             }`}>
                                             {msg.role === 'assistant' ? <FiCpu size={18} /> : <FiUser size={18} />}
                                         </div>
 
                                         <div className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} max-w-[80%]`}>
                                             <div className={`rounded-2xl p-4 md:p-6 text-sm md:text-base leading-relaxed backdrop-blur-md border shadow-sm ${msg.role === 'user'
-                                                ? 'bg-emerald-500/10 border-emerald-500/10 text-emerald-50 rounded-tr-sm'
-                                                : 'bg-white/5 border-white/5 text-gray-200 rounded-tl-sm'
+                                                ? 'bg-emerald-100 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/10 text-emerald-900 dark:text-emerald-50 rounded-tr-sm'
+                                                : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/5 text-text-primary rounded-tl-sm'
                                                 }`}>
                                                 {msg.content}
                                             </div>
                                             {msg.timestamp && (
-                                                <span className="text-[10px] text-gray-600 mt-2 font-mono ml-1 uppercase tracking-widest opacity-60">
+                                                <span className="text-[10px] text-text-secondary mt-2 font-mono ml-1 uppercase tracking-widest opacity-60">
                                                     {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             )}
@@ -173,19 +174,19 @@ const Assistant: React.FC = () => {
                 </div>
 
                 {/* Input Area - Clean & Glassy */}
-                <div className="p-4 md:p-6 pb-20 md:pb-6 bg-gradient-to-t from-black/80 to-transparent absolute bottom-0 left-0 w-full z-20">
+                <div className="p-4 md:p-6 pb-20 md:pb-6 bg-gradient-to-t from-white/90 via-white/50 to-transparent dark:from-black/80 dark:via-black/40 absolute bottom-0 left-0 w-full z-20">
                     <form onSubmit={handleSubmit} className="max-w-3xl mx-auto relative group">
                         <input
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             placeholder="Ask about Abhijit..."
-                            className="w-full bg-[#111111]/80 border border-white/10 rounded-2xl py-4 pl-6 pr-14 text-indigo-50 placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/50 focus:bg-[#151515] transition-all shadow-xl font-mono text-sm backdrop-blur-md text-glow"
+                            className="w-full bg-white/80 dark:bg-[#111111]/80 border border-black/10 dark:border-white/10 rounded-2xl py-4 pl-6 pr-14 text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-indigo-500/50 focus:bg-white dark:focus:bg-[#151515] transition-all shadow-xl font-mono text-sm backdrop-blur-md text-glow"
                         />
                         <button
                             type="submit"
                             disabled={!input.trim() || isLoading}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-indigo-600/20 text-indigo-400 rounded-xl hover:bg-indigo-600 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-indigo-600/10 dark:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-600 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
                         >
                             <FiSend size={18} />
                         </button>
@@ -194,46 +195,46 @@ const Assistant: React.FC = () => {
             </div>
 
             {/* Sidebar Stats - 3 Columns */}
-            <div className="lg:col-span-3 hidden lg:flex flex-col bg-black/20 border-l border-white/5 backdrop-blur-xl p-6 relative z-20">
+            <div className="lg:col-span-3 hidden lg:flex flex-col bg-white/20 dark:bg-black/20 border-l border-line dark:border-white/5 backdrop-blur-xl p-6 relative z-20">
                 <div className="mb-8">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4">
+                    <h3 className="text-xs font-bold text-text-secondary uppercase tracking-widest flex items-center gap-2 mb-4">
                         <FiActivity /> System Metrics
                     </h3>
                     <div className="grid grid-cols-1 gap-3">
-                        <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
-                            <span className="text-xs text-gray-400">Response Time</span>
-                            <span className="text-sm font-mono text-emerald-400 font-bold">~120ms</span>
+                        <div className="p-4 rounded-xl bg-white/40 dark:bg-white/5 border border-line dark:border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
+                            <span className="text-xs text-text-secondary">Response Time</span>
+                            <span className="text-sm font-mono text-emerald-500 dark:text-emerald-400 font-bold">~120ms</span>
                         </div>
-                        <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
-                            <span className="text-xs text-gray-400">Model</span>
-                            <span className="text-sm font-mono text-indigo-400 font-bold">GPT-4o</span>
+                        <div className="p-4 rounded-xl bg-white/40 dark:bg-white/5 border border-line dark:border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
+                            <span className="text-xs text-text-secondary">Model</span>
+                            <span className="text-sm font-mono text-indigo-500 dark:text-indigo-400 font-bold">GPT-4o</span>
                         </div>
-                        <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
-                            <span className="text-xs text-gray-400">Session ID</span>
-                            <span className="text-xs font-mono text-gray-500 truncate w-24">#8F2A-9X</span>
+                        <div className="p-4 rounded-xl bg-white/40 dark:bg-white/5 border border-line dark:border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
+                            <span className="text-xs text-text-secondary">Session ID</span>
+                            <span className="text-xs font-mono text-text-secondary truncate w-24">#8F2A-9X</span>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 mb-4">
+                    <h3 className="text-xs font-bold text-text-secondary uppercase tracking-widest flex items-center gap-2 mb-4">
                         <FiSettings /> Capabilities
                     </h3>
                     <div className="space-y-2">
                         {['Portfolio Analysis', 'Skill Match', 'Project Insights', 'Code Explanation'].map((item) => (
-                            <div key={item} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] transition-all cursor-default group">
-                                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                            <div key={item} className="flex items-center gap-3 p-3 rounded-xl bg-white/40 dark:bg-white/[0.02] border border-line dark:border-white/5 hover:bg-white/60 dark:hover:bg-white/[0.05] transition-all cursor-default group">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500 dark:text-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
                                     <FiMessageSquare size={14} />
                                 </div>
-                                <span className="text-sm text-gray-400 group-hover:text-gray-200">{item}</span>
+                                <span className="text-sm text-text-secondary group-hover:text-text-primary">{item}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="mt-auto pt-6 border-t border-white/5">
-                    <div className="flex items-center gap-2 text-xs text-gray-600">
-                        <FiClock className="text-gray-500" />
+                <div className="mt-auto pt-6 border-t border-line dark:border-white/5">
+                    <div className="flex items-center gap-2 text-xs text-text-secondary">
+                        <FiClock className="text-text-secondary" />
                         <span>Session started at {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                 </div>

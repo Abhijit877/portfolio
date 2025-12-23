@@ -61,7 +61,7 @@ const ParallaxRow = ({ title, skills, velocity }: { title: string, skills: any[]
       <h3 className="text-xl font-bold text-accent-primary mb-6 text-center tracking-widest uppercase opacity-70">{title}</h3>
       <div className="flex flex-wrap justify-center gap-6">
         {skills.map((skill) => (
-          <div key={skill.name} className="flex flex-col items-center justify-center w-32 h-32 bg-background-primary/50 backdrop-blur-md border border-line/50 rounded-2xl hover:border-accent-primary transition-all hover:scale-110 hover:bg-background-secondary shadow-lg">
+          <div key={skill.name} className="flex flex-col items-center justify-center w-32 h-32 bg-background-secondary dark:bg-background-primary/50 backdrop-blur-md border border-line/50 rounded-2xl hover:border-accent-primary transition-all hover:scale-110 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] shadow-lg shadow-slate-200/50 dark:shadow-none">
             <div className="text-4xl text-text-secondary mb-2">{skill.icon}</div>
             <span className="text-xs font-bold text-text-primary text-center px-2">{skill.name}</span>
           </div>

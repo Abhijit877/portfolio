@@ -8,11 +8,14 @@ const Skills = lazy(() => import('../components/Skills'));
 const Projects = lazy(() => import('../components/Projects'));
 const Experience = lazy(() => import('../components/Experience'));
 const Contact = lazy(() => import('../components/Contact'));
-import LabsShowcase from '../components/LabsShowcase';
+import LabsTeaser from '../components/LabsTeaser';
+import { BootSequence } from '../components/BootSequence';
 
 const Home: React.FC = () => {
     const { isRecruiterMode } = useRecruiter();
     const hasNotified = useRef(false);
+
+    const [booted, setBooted] = React.useState(false);
 
     useEffect(() => {
         const sessionKey = 'visitor_notified';
@@ -37,13 +40,18 @@ const Home: React.FC = () => {
 
     return (
         <main>
-            <section id="hero"><Hero /></section>
-            <LabsShowcase />
-            <section id="about"><About /></section>
-            <section id="skills"><Skills /></section>
-            <section id="projects"><Projects /></section>
-            <section id="experience"><Experience /></section>
-            <section id="contact"><Contact /></section>
+            {!booted && <BootSequence onComplete={() => setBooted(true)} />}
+            {booted && (
+                <>
+                    <section id="hero"><Hero /></section>
+                    <LabsTeaser />
+                    <section id="about"><About /></section>
+                    <section id="skills"><Skills /></section>
+                    <section id="projects"><Projects /></section>
+                    <section id="experience"><Experience /></section>
+                    <section id="contact"><Contact /></section>
+                </>
+            )}
         </main>
     );
 };
