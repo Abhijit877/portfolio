@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { LayoutGroup } from 'framer-motion';
 import { ThemeProvider } from './context/ThemeContext';
 import { RecruiterProvider } from './context/RecruiterContext';
 import { UIProvider } from './context/UIContext';
@@ -13,33 +14,34 @@ import TypingTest from './pages/TypingTest';
 import MarkdownConverter from './pages/MarkdownConverter';
 import Assistant from './pages/Assistant';
 
-
 function App() {
   return (
     <ThemeProvider>
       <RecruiterProvider>
         <UIProvider>
           <Router>
-            <div className="min-h-screen bg-background-primary text-text-primary transition-colors duration-300 font-sans selection:bg-accent-primary selection:text-white">
-              <Header />
-              <Suspense fallback={
-                <div className="flex items-center justify-center min-h-screen bg-background-primary">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-primary"></div>
-                </div>
-              }>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/labs/assistant" element={<Assistant />} />
-                  <Route path="/labs/minimax" element={<RoundCrossGame />} />
-                  <Route path="/labs/converter" element={<DocumentConverter />} />
-                  <Route path="/labs/typing-test" element={<TypingTest />} />
-                  <Route path="/labs/markdown" element={<MarkdownConverter />} />
+            <LayoutGroup>
+              <div className="min-h-screen bg-background-primary text-text-primary transition-colors duration-300 font-sans selection:bg-accent-primary selection:text-white">
+                <Header />
+                <Suspense fallback={
+                  <div className="flex items-center justify-center min-h-screen bg-background-primary">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-primary"></div>
+                  </div>
+                }>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/labs/assistant" element={<Assistant />} />
+                    <Route path="/labs/minimax" element={<RoundCrossGame />} />
+                    <Route path="/labs/converter" element={<DocumentConverter />} />
+                    <Route path="/labs/typing-test" element={<TypingTest />} />
+                    <Route path="/labs/markdown" element={<MarkdownConverter />} />
 
-                </Routes>
-              </Suspense>
-              <Footer />
-              <AIChatWidget />
-            </div>
+                  </Routes>
+                </Suspense>
+                <Footer />
+                <AIChatWidget />
+              </div>
+            </LayoutGroup>
           </Router>
         </UIProvider>
       </RecruiterProvider>

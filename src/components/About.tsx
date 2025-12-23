@@ -32,8 +32,8 @@ const About: React.FC = () => {
   const { isRecruiterMode } = useRecruiter();
 
   return (
-    <section className="py-20 bg-background-secondary text-text-primary">
-      <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+    <section className="section-padding bg-background-secondary text-text-primary">
+      <div className="layout-container grid md:grid-cols-2 gap-12 items-center">
 
         {/* Story / Text */}
         <div>

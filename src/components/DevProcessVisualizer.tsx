@@ -188,7 +188,7 @@ const SyntaxHighlight = ({ code }: { code: string }) => {
         <>
             {parts.map((part, i) => {
                 if (/^(public|async|Task|return|if|var|await|new|int|string|bool)$/.test(part)) {
-                    return <span key={i} className="text-purple-400">{part}</span>;
+                    return <span key={i} className="text-blue-400">{part}</span>;
                 } else if (/^"[^"]*"$/.test(part)) {
                     return <span key={i} className="text-green-400">{part}</span>;
                 } else if (/^\/\/.*$/.test(part)) {

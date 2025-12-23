@@ -159,8 +159,8 @@ const RoundCrossGame: React.FC = () => {
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => handleClick(index)}
                                     className={`w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-xl flex items-center justify-center text-5xl font-bold transition-all border border-white/5 bg-black/40 ${cell === 'X' ? 'text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.3)]' :
-                                            cell === 'O' ? 'text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.3)]' :
-                                                'text-transparent hover:border-white/20'
+                                        cell === 'O' ? 'text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.3)]' :
+                                            'text-transparent hover:border-white/10'
                                         }`}
                                 >
                                     {cell && (

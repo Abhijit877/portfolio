@@ -4,17 +4,20 @@ interface UIContextType {
     isChatOpen: boolean;
     setChatOpen: (open: boolean) => void;
     toggleChat: () => void;
+    heroInView: boolean;
+    setHeroInView: (inView: boolean) => void;
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
 export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isChatOpen, setChatOpen] = useState(false);
+    const [heroInView, setHeroInView] = useState(true);
 
     const toggleChat = () => setChatOpen(prev => !prev);
 
     return (
-        <UIContext.Provider value={{ isChatOpen, setChatOpen, toggleChat }}>
+        <UIContext.Provider value={{ isChatOpen, setChatOpen, toggleChat, heroInView, setHeroInView }}>
             {children}
         </UIContext.Provider>
     );

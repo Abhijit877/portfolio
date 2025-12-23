@@ -217,7 +217,7 @@ function GalleryGrid() {
                         <motion.div
                             className="absolute inset-0 bg-blue-500 opacity-40 mix-blend-overlay"
                         />
-                        <div className="absolute inset-2 border border-white/20" />
+                        <div className="absolute inset-2 border border-white/10" />
                     </div>
                     <div className="aspect-[3/4] bg-neutral-800 rounded-sm relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-amber-200 to-orange-500 opacity-50" />

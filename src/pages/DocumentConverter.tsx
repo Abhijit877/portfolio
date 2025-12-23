@@ -194,7 +194,7 @@ const DocumentConverter: React.FC = () => {
                             min-h-[300px] flex-1 rounded-2xl border-2 border-dashed transition-all relative overflow-hidden group
                             ${dragActive
                                 ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01]'
-                                : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+                                : 'border-white/10 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]'
                             }
                         `}
                         onDragEnter={handleDrag}

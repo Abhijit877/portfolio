@@ -12,7 +12,7 @@ interface LabLayoutProps {
 
 const MeshBackground = () => (
     <div className="absolute inset-0 z-0 overflow-hidden bg-[#050505]">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-900/20 rounded-full blur-[120px] animate-pulse-slow" />
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-[120px] animate-pulse-slow" />
         <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[60%] bg-blue-900/10 rounded-full blur-[100px] animate-pulse-slow delay-1000" />
         <div className="absolute top-[40%] left-[30%] w-[30%] h-[30%] bg-indigo-900/10 rounded-full blur-[80px] animate-pulse-slow delay-2000" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
@@ -27,7 +27,7 @@ const LabLayout: React.FC<LabLayoutProps> = ({
     className
 }) => {
     return (
-        <div className="relative w-full h-screen overflow-hidden bg-[#050505] text-gray-100 font-sans selection:bg-purple-500/30">
+        <div className="relative w-full h-screen overflow-hidden bg-[#050505] text-gray-100 font-sans selection:bg-cyan-500/30">
             <MeshBackground />
 
             {/* Header - Fixed Z-Index 100 */}

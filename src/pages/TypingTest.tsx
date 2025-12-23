@@ -124,7 +124,7 @@ const TypingTest: React.FC = () => {
                 className = "text-red-400 bg-red-500/20"; // Incorrect
             }
         } else if (index === input.length) {
-            className = "text-indigo-400 border-b-2 border-indigo-500 animate-pulse"; // Cursor
+            className = "text-accent-primary border-b-2 border-accent-primary animate-pulse"; // Cursor
         }
 
         return (
@@ -255,8 +255,8 @@ const TypingTest: React.FC = () => {
                                             <div className="text-2xl font-bold text-emerald-400">{accuracy}%</div>
                                             <div className="text-[10px] text-gray-500 uppercase">Accuracy</div>
                                         </div>
-                                        <div className="p-4 bg-purple-500/10 rounded-xl border border-purple-500/20">
-                                            <div className="text-2xl font-bold text-purple-400">A+</div>
+                                        <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                                            <div className="text-2xl font-bold text-blue-400">A+</div>
                                             <div className="text-[10px] text-gray-500 uppercase">Grade</div>
                                         </div>
                                     </div>

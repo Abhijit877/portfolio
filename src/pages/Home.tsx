@@ -1,4 +1,6 @@
-import React, { lazy } from 'react';
+import React, { lazy, useEffect, useRef } from 'react';
+import { useRecruiter } from '../context/RecruiterContext';
+import RecruiterDashboard from '../components/RecruiterDashboard';
 
 const Hero = lazy(() => import('../components/Hero'));
 const About = lazy(() => import('../components/About'));
@@ -9,6 +11,30 @@ const Contact = lazy(() => import('../components/Contact'));
 import LabsShowcase from '../components/LabsShowcase';
 
 const Home: React.FC = () => {
+    const { isRecruiterMode } = useRecruiter();
+    const hasNotified = useRef(false);
+
+    useEffect(() => {
+        const sessionKey = 'visitor_notified';
+        if (!sessionStorage.getItem(sessionKey) && !hasNotified.current) {
+            hasNotified.current = true; // Prevent double firing in strict mode
+            fetch('/api/telegram', { method: 'POST' })
+                .then(() => sessionStorage.setItem(sessionKey, 'true'))
+                .catch(err => console.error('Notify failed', err));
+        }
+    }, []);
+
+    if (isRecruiterMode) {
+        return (
+            <main>
+                <RecruiterDashboard />
+                {/* Optional: Show selected sections below dashboard if needed, or just specific ones */}
+                <section id="projects"><Projects /></section>
+                <section id="skills"><Skills /></section>
+            </main>
+        );
+    }
+
     return (
         <main>
             <section id="hero"><Hero /></section>

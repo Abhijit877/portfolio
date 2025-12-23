@@ -7,8 +7,8 @@ import * as THREE from 'three';
 
 // --- Configuration ---
 
-const NEON_CYAN = '#00f3ff';
-const NEON_PURPLE = '#bc13fe';
+const NEON_CYAN = '#00E5FF';
+const NEON_BLUE = '#2979FF';
 
 
 // Tier Z-Positions (Depth)
@@ -73,7 +73,7 @@ const SystemNode = ({ data }: { data: NodeData }) => {
     const meshRef = useRef<THREE.Mesh>(null!);
 
     const color = useMemo(() => {
-        return data.type === 'client' ? '#3b82f6' : data.type === 'api' ? '#8b5cf6' : '#f97316';
+        return data.type === 'client' ? '#00E5FF' : data.type === 'api' ? '#3b82f6' : '#f97316';
     }, [data.type]);
 
     const Geometry = useMemo(() => {
@@ -269,11 +269,11 @@ const Scene = () => {
                 <TraceParticle path={[getPos('api-gateway'), getPos('db-primary')]} color={NEON_CYAN} delay={1.0} duration={0.5} />
                 <TraceParticle path={[getPos('api-gateway'), getPos('db-cache')]} color={NEON_CYAN} delay={1.0} duration={0.5} />
 
-                <TraceParticle path={[getPos('db-primary'), getPos('api-gateway')]} color={NEON_PURPLE} delay={2.5} duration={0.5} />
-                <TraceParticle path={[getPos('db-cache'), getPos('api-gateway')]} color={NEON_PURPLE} delay={2.5} duration={0.5} />
+                <TraceParticle path={[getPos('db-primary'), getPos('api-gateway')]} color={NEON_BLUE} delay={2.5} duration={0.5} />
+                <TraceParticle path={[getPos('db-cache'), getPos('api-gateway')]} color={NEON_BLUE} delay={2.5} duration={0.5} />
 
-                <TraceParticle path={[getPos('api-gateway'), getPos('client-1')]} color={NEON_PURPLE} delay={3.0} duration={1} />
-                <TraceParticle path={[getPos('api-gateway'), getPos('client-2')]} color={NEON_PURPLE} delay={3.0} duration={1} />
+                <TraceParticle path={[getPos('api-gateway'), getPos('client-1')]} color={NEON_BLUE} delay={3.0} duration={1} />
+                <TraceParticle path={[getPos('api-gateway'), getPos('client-2')]} color={NEON_BLUE} delay={3.0} duration={1} />
             </group>
         </group>
     );
@@ -285,7 +285,7 @@ const SystemVisualizer = () => {
             {/* Labels (HTML Overlay for crisp text) */}
             <div className="absolute top-4 right-4 z-10 flex flex-col items-end space-y-2 pointer-events-none opacity-50">
                 <div className="text-xs font-mono text-cyan-400">TIER 3: CLIENT</div>
-                <div className="text-xs font-mono text-purple-400">TIER 2: API/LOGIC</div>
+                <div className="text-xs font-mono text-blue-400">TIER 2: API/LOGIC</div>
                 <div className="text-xs font-mono text-orange-400">TIER 1: CORE DATA</div>
             </div>
 
@@ -306,7 +306,7 @@ const SystemVisualizer = () => {
 
                     <ambientLight intensity={0.5} />
                     <pointLight position={[10, 10, 10]} intensity={1} color="#ffffff" />
-                    <pointLight position={[-10, 5, -10]} intensity={2} color="#bc13fe" />
+                    <pointLight position={[-10, 5, -10]} intensity={2} color="#2979FF" />
 
                     <Scene />
                 </React.Suspense>

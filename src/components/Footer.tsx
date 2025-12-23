@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
 
     return (
         <footer className="bg-background-secondary border-t border-line py-12 transition-colors duration-300">
-            <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+            <div className="layout-container flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
                 <div className="text-center md:text-left">
                     <h3 className="text-xl font-bold font-mono text-text-primary mb-2">&lt;Dev<span className="text-accent-primary">Folio</span> /&gt;</h3>
                     <p className="text-text-secondary text-sm">

@@ -98,7 +98,7 @@ const MarkdownConverter: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 rounded-2xl bg-[#080808] border border-white/10 shadow-2xl overflow-hidden relative group hover:border-white/20 transition-colors">
+                    <div className="flex-1 rounded-2xl bg-[#080808] border border-white/10 shadow-2xl overflow-hidden relative group hover:border-white/10 transition-colors">
                         <textarea
                             value={markdown}
                             onChange={(e) => setMarkdown(e.target.value)}

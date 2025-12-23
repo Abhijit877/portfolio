@@ -75,20 +75,20 @@ const Skills: React.FC = () => {
   const { isRecruiterMode } = useRecruiter();
 
   return (
-    <section className="py-20 bg-background-secondary relative overflow-hidden min-h-screen flex items-center">
-      <div className="container mx-auto px-6 relative z-10">
+    <section className="section-padding bg-background-secondary relative overflow-hidden min-h-screen flex items-center">
+      <div className="layout-container relative z-10">
         <div className="mb-20 text-center">
           <h2 className="text-4xl font-bold mb-4">
-             <FallingText 
-               content="Technical Landscape" 
-               highlightWords={["Technical", "Landscape"]}
-               splitBy="char"
-               delay={0.2}
-               className="justify-center"
-             />
+            <FallingText
+              content="Technical Landscape"
+              highlightWords={["Technical", "Landscape"]}
+              splitBy="char"
+              delay={0.2}
+              className="justify-center"
+            />
           </h2>
           <div className="text-text-secondary max-w-2xl mx-auto">
-            <FallingText 
+            <FallingText
               content="A comprehensive view of my specialized stack."
               delay={0.6}
               className="justify-center"

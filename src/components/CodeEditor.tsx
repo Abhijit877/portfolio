@@ -96,7 +96,7 @@ const snippetTokens: CodeToken[] = [
 
 const getColor = (type: CodeToken['type']) => {
     switch (type) {
-        case 'keyword': return 'text-purple-400';
+        case 'keyword': return 'text-blue-400';
         case 'type': return 'text-yellow-300';
         case 'method': return 'text-blue-400';
         case 'variable': return 'text-cyan-200';
