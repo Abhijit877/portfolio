@@ -94,7 +94,7 @@ const Header: React.FC = () => {
 
   return (
     <motion.header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isRecruiterRoute ? 'hidden' : ''} ${isScrolled || isMobileMenuOpen || location.pathname !== '/'
+      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${isRecruiterRoute ? 'hidden' : ''} ${isScrolled || isMobileMenuOpen || location.pathname !== '/'
         ? 'glass py-4'
         : 'bg-transparent py-6'
         }`}
@@ -105,12 +105,13 @@ const Header: React.FC = () => {
       <div className="layout-container flex items-center justify-between">
         {/* Logo Container */}
         <Link to="/" className="flex items-center gap-3 z-20 group">
-          <div className="relative h-8 w-48 overflow-visible hidden sm:block">
+          <div className="relative h-8 w-48 overflow-visible block">
             {showNameInNavbar ? (
               <motion.div
                 layoutId="brand-name"
                 className="text-lg font-bold text-text-primary absolute inset-0 flex items-center whitespace-nowrap"
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                // Match gradient or styles if needed, but keeping it simple for now to transition into "logo" look
+                transition={{ type: "spring", stiffness: 200, damping: 25 }}
               >
                 Abhijit Behera
               </motion.div>

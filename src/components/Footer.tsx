@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LocationDisplay from './LocationDisplay';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, Twitter, Mail, ArrowUpRight } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
@@ -30,7 +31,7 @@ const Footer: React.FC = () => {
     const socialLinks = [
         { icon: <Github size={24} />, href: "https://github.com/Abhijit877", label: "Github" },
         { icon: <Linkedin size={24} />, href: "https://linkedin.com/in/abhijit-behera", label: "LinkedIn" },
-        { icon: <Twitter size={24} />, href: "https://twitter.com", label: "Twitter" }, // Replace with actual if known
+        { icon: <Twitter size={24} />, href: "https://x.com/", label: "Twitter" },
         { icon: <Mail size={24} />, href: "mailto:abhijitbehere877@gmail.com", label: "Email" }
     ];
 
@@ -78,7 +79,7 @@ const Footer: React.FC = () => {
 
                     <div className="flex flex-col gap-2">
                         <div className="text-text-primary font-bold text-lg">
-                            Hyderabad, IN
+                            <LocationDisplay />
                         </div>
                         <div className="text-text-secondary font-mono text-sm tabular-nums flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -103,7 +104,7 @@ const Footer: React.FC = () => {
                     </div>
 
                     <div className="text-text-secondary text-sm md:text-right">
-                        <p>&copy; {currentYear} Abhijit Behera.</p>
+                        <p>&copy; {currentYear} Abhijit Behera</p>
                         <p className="text-xs opacity-50">Built with React & Framer Motion</p>
                     </div>
                 </div>

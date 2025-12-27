@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import FallingText from './FallingText';
 import { useRecruiter } from '../context/RecruiterContext';
-import { FiGithub, FiExternalLink, FiCode, FiBox, FiLayers, FiDatabase, FiServer, FiArrowRight } from 'react-icons/fi';
+import { FiGithub, FiExternalLink, FiCode, FiBox, FiArrowRight } from 'react-icons/fi';
 
 const projects = [
   {
@@ -56,22 +56,19 @@ const caseStudySteps = [
     id: 0,
     title: "The Problem",
     content: "Legacy CRM systems were causing a 45% delay in quote generation due to manual data entry and lack of CPQ integration. Sales reps spent more time on admin than selling.",
-    icon: <FiServer className="text-6xl text-red-500" />,
-    highlight: "Manual Entry & Latency"
+    image: "/hero-landscape.png"
   },
   {
     id: 1,
     title: "The Architecture",
     content: "Designed a clean architecture using Azure Logic Apps as the middleware BFF (Backend for Frontend). This decoupled the D365 UI from the SAP ERP, ensuring non-blocking operations.",
-    icon: <FiLayers className="text-6xl text-blue-500" />,
-    highlight: "Azure Middleware & decoupling"
+    image: "/hero-landscape.png"
   },
   {
     id: 2,
     title: "The Solution",
     content: "Implemented a custom PCF Grid for rapid product selection and a Power Automate flow for PDF generation. Reduced quote cycle time from 2 days to 2 hours.",
-    icon: <FiDatabase className="text-6xl text-green-500" />,
-    highlight: "PCF & Automation"
+    image: "/hero-landscape.png"
   }
 ];
 
@@ -175,11 +172,13 @@ const Projects: React.FC = () => {
                     animate={{ opacity: 1, scale: 1, rotate: 0 }}
                     exit={{ opacity: 0, scale: 0.9, rotate: 5 }}
                     transition={{ duration: 0.5 }}
-                    className="flex flex-col items-center text-center space-y-6"
+                    className="w-full h-full flex items-center justify-center p-4"
                   >
-                    {caseStudySteps[activeStep].icon}
-                    <h4 className="text-3xl font-bold text-text-primary">{caseStudySteps[activeStep].highlight}</h4>
-                    <div className="w-20 h-1 bg-accent-primary rounded-full" />
+                    <img
+                      src={caseStudySteps[activeStep].image}
+                      alt={caseStudySteps[activeStep].title}
+                      className="w-full h-auto max-h-full object-cover rounded-xl shadow-2xl border border-line/10"
+                    />
                   </motion.div>
                 </AnimatePresence>
               </div>

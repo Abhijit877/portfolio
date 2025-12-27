@@ -24,7 +24,7 @@ const AIChatWidget: React.FC = () => {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
-
+        
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
