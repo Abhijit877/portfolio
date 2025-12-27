@@ -1,4 +1,5 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
+import { clarity } from 'react-microsoft-clarity';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { LayoutGroup } from 'framer-motion';
 import { ThemeProvider } from './context/ThemeContext';
@@ -16,14 +17,20 @@ import Assistant from './pages/Assistant';
 import Labs from './pages/Labs';
 import ScrollToTop from './components/ScrollToTop';
 import RecruiterMode from './pages/RecruiterMode';
+import SmoothScroll from './components/SmoothScroll';
 
 function App() {
+  useEffect(() => {
+    clarity.init('us0a7x7gzy');
+  }, []);
+
   return (
     <ThemeProvider>
       <RecruiterProvider>
         <UIProvider>
           <Router>
             <ScrollToTop />
+            <SmoothScroll />
             <LayoutGroup>
               <div className="min-h-screen bg-background-primary text-text-primary transition-colors duration-300 font-sans selection:bg-accent-primary selection:text-white">
                 <Header />

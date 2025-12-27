@@ -80,7 +80,7 @@ const Contact: React.FC = () => {
 
                                 <div className="flex gap-6 mb-12">
                                     {[
-                                        { icon: <FiMail />, link: "mailto:hello@example.com" },
+                                        { icon: <FiMail />, link: "mailto:abhijitbehera877@gmail.com" },
                                         { icon: <FiGithub />, link: "https://github.com/Abhijit877" },
                                         { icon: <FiLinkedin />, link: "#" },
                                         { icon: <FiTwitter />, link: "#" },
