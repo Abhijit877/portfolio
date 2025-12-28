@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiSend, FiUser, FiCpu, FiActivity, FiSettings, FiClock, FiMessageSquare } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import LabLayout from '../components/LabLayout';
+import Particles from '../components/react-bits/Particles';
+import DecayText from '../components/react-bits/DecayText';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -77,11 +79,13 @@ const Assistant: React.FC = () => {
 
     // --- Empty State Component ---
     const EmptyState = () => (
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 opacity-60">
-            <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center mb-6 animate-pulse-slow">
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 opacity-80 z-20 relative">
+            <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 flex items-center justify-center mb-6 animate-pulse-slow backdrop-blur-sm border border-indigo-500/20">
                 <FiCpu className="w-10 h-10 text-indigo-500 dark:text-indigo-400" />
             </div>
-            <h3 className="text-xl font-bold text-text-primary mb-2">Neural Interface Ready</h3>
+            <div className="mb-2">
+                <DecayText text="Neural Interface Ready" className="text-xl font-bold text-text-primary" />
+            </div>
             <p className="text-sm text-text-secondary max-w-sm mb-8">
                 Connect to the portfolio knowledge base. Ask about projects, technical skills, or professional experience.
             </p>
@@ -90,7 +94,7 @@ const Assistant: React.FC = () => {
                     <button
                         key={suggestion}
                         onClick={() => handleSubmit(undefined, suggestion)}
-                        className="px-4 py-3 bg-white/5 hover:bg-black/5 dark:hover:bg-white/10 border border-black/5 dark:border-white/5 hover:border-indigo-500/30 rounded-xl text-sm text-text-secondary hover:text-indigo-500 dark:hover:text-indigo-300 transition-all text-left flex items-center justify-between group"
+                        className="px-4 py-3 bg-white/5 hover:bg-black/5 dark:hover:bg-white/10 border border-black/5 dark:border-white/5 hover:border-indigo-500/30 rounded-xl text-sm text-text-secondary hover:text-indigo-500 dark:hover:text-indigo-300 transition-all text-left flex items-center justify-between group backdrop-blur-md"
                     >
                         <span>{suggestion}</span>
                         <FiSend className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-indigo-500 dark:text-indigo-400" />
@@ -104,23 +108,19 @@ const Assistant: React.FC = () => {
         <LabLayout
             title="AI Assistant"
             description="Interactive Portfolio Intelligence"
-            actions={
-                <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 text-xs text-green-600 dark:text-green-400 font-mono tracking-wider">
-                    <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse shadow-[0_0_8px_currentColor]" />
-                    <span>SYSTEM ONLINE</span>
-                </div>
-            }
-            className="grid grid-cols-1 lg:grid-cols-12 grid-rows-[1fr_auto] lg:grid-rows-1 gap-0 lg:gap-0" // Bento Grid Setup
+            className="grid grid-cols-1 lg:grid-cols-12 grid-rows-[1fr_auto] lg:grid-rows-1 gap-0 lg:gap-0 relative" // Bento Grid Setup
         >
+            <Particles className="absolute inset-0 z-0 opacity-30" quantity={40} />
+
             {/* Main Chat Area - 9 Columns */}
-            <div className="lg:col-span-9 flex flex-col h-full bg-white/50 dark:bg-white/[0.01] relative z-10">
+            <div className="lg:col-span-9 flex flex-col h-[80vh] bg-white/50 dark:bg-white/[0.01] relative z-10 rounded-l-2xl border border-r-0 border-white/10 overflow-hidden backdrop-blur-sm">
 
                 {/* Scrollable Messages */}
-                <div className="flex-1 overflow-y-auto min-h-0 p-4 md:p-8 scrollbar-thin scrollbar-thumb-black/10 dark:scrollbar-thumb-white/10">
+                <div className="flex-1 overflow-y-auto min-h-0 p-4 md:p-8 scrollbar-thin scrollbar-thumb-black/10 dark:scrollbar-thumb-white/10 relative">
                     {messages.length === 0 ? (
                         <EmptyState />
                     ) : (
-                        <div className="space-y-8 max-w-3xl mx-auto">
+                        <div className="space-y-8 max-w-3xl mx-auto z-20 relative">
                             <AnimatePresence initial={false}>
                                 {messages.map((msg, idx) => (
                                     <motion.div
@@ -195,7 +195,7 @@ const Assistant: React.FC = () => {
             </div>
 
             {/* Sidebar Stats - 3 Columns */}
-            <div className="lg:col-span-3 hidden lg:flex flex-col bg-white/20 dark:bg-black/20 border-l border-line dark:border-white/5 backdrop-blur-xl p-6 relative z-20">
+            <div className="lg:col-span-3 hidden lg:flex flex-col bg-white/20 dark:bg-black/20 border-l border-y border-r border-line dark:border-white/5 backdrop-blur-xl p-6 relative z-20 rounded-r-2xl h-[80vh]">
                 <div className="mb-8">
                     <h3 className="text-xs font-bold text-text-secondary uppercase tracking-widest flex items-center gap-2 mb-4">
                         <FiActivity /> System Metrics
@@ -207,7 +207,7 @@ const Assistant: React.FC = () => {
                         </div>
                         <div className="p-4 rounded-xl bg-white/40 dark:bg-white/5 border border-line dark:border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
                             <span className="text-xs text-text-secondary">Model</span>
-                            <span className="text-sm font-mono text-indigo-500 dark:text-indigo-400 font-bold">GPT-4o</span>
+                            <span className="text-sm font-mono text-indigo-500 dark:text-indigo-400 font-bold">gpt-4o</span>
                         </div>
                         <div className="p-4 rounded-xl bg-white/40 dark:bg-white/5 border border-line dark:border-white/5 flex items-center justify-between group hover:border-indigo-500/30 transition-colors">
                             <span className="text-xs text-text-secondary">Session ID</span>

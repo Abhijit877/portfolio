@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { FiEdit3, FiEye, FiDownload, FiCopy, FiCheck, FiTrash2, FiLayout } from 'react-icons/fi';
 import LabLayout from '../components/LabLayout';
+import FuzzyOverlay from '../components/react-bits/FuzzyOverlay';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 
@@ -60,7 +61,7 @@ const MarkdownConverter: React.FC = () => {
             title="Markdown Live"
             description="Real-Time Rendering Engine"
             actions={
-                <div className="flex bg-white/5 rounded-lg p-1 border border-white/10">
+                <div className="flex bg-white/5 rounded-lg p-1 border border-white/10 backdrop-blur-md">
                     <button
                         onClick={() => setActiveView('split')}
                         className={`p-2 rounded-md transition-all ${activeView === 'split' ? 'bg-indigo-500/20 text-indigo-300' : 'text-gray-400 hover:text-white'}`}
@@ -84,8 +85,10 @@ const MarkdownConverter: React.FC = () => {
                     </button>
                 </div>
             }
-            className="flex flex-col lg:flex-row gap-6 p-6 lg:p-8 h-[calc(100vh-140px)]"
+            className="flex flex-col lg:flex-row gap-6 p-6 lg:p-8 h-[calc(100vh-140px)] relative"
         >
+            <FuzzyOverlay />
+
             {/* Editor Pane */}
             {(activeView === 'split' || activeView === 'edit') && (
                 <div className={`flex-1 flex flex-col gap-4 min-w-0 ${activeView === 'split' ? 'lg:w-1/2' : 'w-full'}`}>
@@ -98,7 +101,7 @@ const MarkdownConverter: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 rounded-2xl bg-[#080808] border border-white/10 shadow-2xl overflow-hidden relative group hover:border-white/10 transition-colors">
+                    <div className="flex-1 rounded-2xl bg-[#080808]/80 border border-white/10 shadow-2xl overflow-hidden relative group hover:border-white/20 transition-colors backdrop-blur-md">
                         <textarea
                             value={markdown}
                             onChange={(e) => setMarkdown(e.target.value)}
@@ -144,7 +147,7 @@ const MarkdownConverter: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 rounded-2xl bg-white border border-white/10 shadow-2xl overflow-hidden relative">
+                    <div className="flex-1 rounded-2xl bg-white border border-white/10 shadow-2xl overflow-hidden relative backdrop-blur-md">
                         {/* Browser Window Bar */}
                         <div className="absolute top-0 left-0 right-0 h-8 bg-gray-100 border-b border-gray-200 flex items-center px-4 gap-1.5 z-10">
                             <div className="w-2.5 h-2.5 rounded-full bg-red-400" />

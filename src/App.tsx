@@ -1,11 +1,12 @@
 import { Suspense, useEffect } from 'react';
 import { clarity } from 'react-microsoft-clarity';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { LayoutGroup } from 'framer-motion';
 import { ThemeProvider } from './context/ThemeContext';
 import { RecruiterProvider } from './context/RecruiterContext';
 import { UIProvider } from './context/UIContext';
-import Header from './components/Header';
+// import Header from './components/Header'; // Deprecated for Home
+import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AIChatWidget from './components/AIChatWidget';
 import Home from './pages/Home';
@@ -18,6 +19,19 @@ import Labs from './pages/Labs';
 import ScrollToTop from './components/ScrollToTop';
 import RecruiterMode from './pages/RecruiterMode';
 import SmoothScroll from './components/SmoothScroll';
+
+// Layout wrapper to handle conditional Navbar logic using useLocation
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const showNavbar = location.pathname === '/';
+
+  return (
+    <div className="min-h-screen bg-background-primary text-text-primary transition-colors duration-300 font-sans selection:bg-accent-primary selection:text-white">
+      {showNavbar && <Navbar />}
+      {children}
+    </div>
+  );
+};
 
 function App() {
   useEffect(() => {
@@ -32,8 +46,7 @@ function App() {
             <ScrollToTop />
             <SmoothScroll />
             <LayoutGroup>
-              <div className="min-h-screen bg-background-primary text-text-primary transition-colors duration-300 font-sans selection:bg-accent-primary selection:text-white">
-                <Header />
+              <Layout>
                 <Suspense fallback={
                   <div className="flex items-center justify-center min-h-screen bg-background-primary">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent-primary"></div>
@@ -48,12 +61,11 @@ function App() {
                     <Route path="/labs/typing-test" element={<TypingTest />} />
                     <Route path="/labs/markdown" element={<MarkdownConverter />} />
                     <Route path="/recruiter" element={<RecruiterMode />} />
-
                   </Routes>
                 </Suspense>
                 <Footer />
                 <AIChatWidget />
-              </div>
+              </Layout>
             </LayoutGroup>
           </Router>
         </UIProvider>

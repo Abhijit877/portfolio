@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMonitor, FiRotateCcw, FiActivity, FiTarget, FiZap, FiClock, FiAlertTriangle } from 'react-icons/fi';
 import LabLayout from '../components/LabLayout';
+import Magnet from '../components/react-bits/Magnet';
 
 // Python code snippets for the test
 const SNIPPETS = [
@@ -137,12 +138,14 @@ const TypingTest: React.FC = () => {
             title="Speed Coder"
             description="Syntax Proficiency Test"
             actions={
-                <button
-                    onClick={resetTest}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-xs font-medium text-text-secondary hover:text-text-primary"
-                >
-                    <FiRotateCcw /> Reset
-                </button>
+                <Magnet padding={50} magnetStrength={3}>
+                    <button
+                        onClick={resetTest}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-xs font-medium text-text-secondary hover:text-text-primary backdrop-blur-md"
+                    >
+                        <FiRotateCcw /> Reset
+                    </button>
+                </Magnet>
             }
             className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 lg:p-8 w-full max-w-7xl mx-auto"
         >
@@ -202,14 +205,14 @@ const TypingTest: React.FC = () => {
 
             {/* Typing Area - Center/Right */}
             <div className="lg:col-span-9 order-2 flex flex-col h-full min-h-[500px]">
-                <div className="flex-1 rounded-2xl bg-slate-50 dark:bg-[#080808] border border-line dark:border-white/10 shadow-2xl relative overflow-hidden flex flex-col group">
+                <div className="flex-1 rounded-2xl bg-slate-50 dark:bg-[#080808] border border-line dark:border-white/10 shadow-[0_0_30px_rgba(99,102,241,0.1)] relative overflow-hidden flex flex-col group transition-all duration-300 hover:shadow-[0_0_40px_rgba(99,102,241,0.2)] hover:border-indigo-500/30">
 
                     {/* Window Controls Decoration */}
                     <div className="h-10 bg-white/80 dark:bg-white/5 border-b border-line dark:border-white/5 flex items-center px-4 gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-500/50 dark:bg-red-500/20 border border-red-500/50" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-500/50 dark:bg-yellow-500/20 border border-yellow-500/50" />
-                        <div className="w-3 h-3 rounded-full bg-emerald-500/50 dark:bg-emerald-500/20 border border-emerald-500/50" />
-                        <div className="ml-auto text-xs font-mono text-text-secondary flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-400 border border-red-500/20" />
+                        <div className="w-3 h-3 rounded-full bg-amber-400 border border-amber-500/20" />
+                        <div className="w-3 h-3 rounded-full bg-emerald-400 border border-emerald-500/20" />
+                        <div className="ml-auto text-xs font-mono text-text-secondary flex items-center gap-2 opacity-50">
                             <FiMonitor /> PYTHON_ENV_3.11
                         </div>
                     </div>
