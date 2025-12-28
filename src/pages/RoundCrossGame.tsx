@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiRefreshCw, FiCpu, FiUser, FiActivity, FiTarget, FiZap, FiAward } from 'react-icons/fi';
 import LabLayout from '../components/LabLayout';
-import Tilt from 'react-parallax-tilt';
 import { getBestMove, checkWinner } from '../utils/minimax';
+import SpotlightCard from '../components/react-bits/SpotlightCard';
+import TiltedCard from '../components/react-bits/TiltedCard';
 
 const RoundCrossGame: React.FC = () => {
     const [board, setBoard] = useState(Array(9).fill(null));
@@ -85,38 +86,40 @@ const RoundCrossGame: React.FC = () => {
             {/* Stats Sidebar - Left (Desktop) / Bottom (Mobile) */}
             <div className="lg:col-span-3 flex flex-col gap-6 order-2 lg:order-1">
                 {/* Scoreboard */}
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl space-y-6">
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                        <FiActivity /> Session Stats
-                    </h3>
+                <TiltedCard className="w-full">
+                    <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl space-y-6 h-full">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                            <FiActivity /> Session Stats
+                        </h3>
 
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-transparent border border-emerald-500/10">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
-                                    <FiUser size={16} />
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-emerald-500/10 to-transparent border border-emerald-500/10">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
+                                        <FiUser size={16} />
+                                    </div>
+                                    <div className="text-sm text-gray-300">Player (X)</div>
                                 </div>
-                                <div className="text-sm text-gray-300">Player (X)</div>
+                                <div className="font-mono text-xl font-bold text-emerald-400">{stats.playerWins}</div>
                             </div>
-                            <div className="font-mono text-xl font-bold text-emerald-400">{stats.playerWins}</div>
-                        </div>
 
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-indigo-500/10 to-transparent border border-indigo-500/10">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
-                                    <FiCpu size={16} />
+                            <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-indigo-500/10 to-transparent border border-indigo-500/10">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+                                        <FiCpu size={16} />
+                                    </div>
+                                    <div className="text-sm text-gray-300">Minimax (O)</div>
                                 </div>
-                                <div className="text-sm text-gray-300">Minimax (O)</div>
+                                <div className="font-mono text-xl font-bold text-indigo-400">{stats.aiWins}</div>
                             </div>
-                            <div className="font-mono text-xl font-bold text-indigo-400">{stats.aiWins}</div>
-                        </div>
 
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                            <div className="text-sm text-gray-400 ml-2">Draws</div>
-                            <div className="font-mono text-xl font-bold text-gray-500 mr-2">{stats.draws}</div>
+                            <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                                <div className="text-sm text-gray-400 ml-2">Draws</div>
+                                <div className="font-mono text-xl font-bold text-gray-500 mr-2">{stats.draws}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </TiltedCard>
 
                 {/* AI Insights */}
                 <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 backdrop-blur-xl flex-1 hidden lg:flex flex-col">
@@ -144,12 +147,9 @@ const RoundCrossGame: React.FC = () => {
                 <div className="relative group perspective-1000">
                     <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 to-emerald-500/20 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
 
-                    <Tilt
-                        tiltMaxAngleX={5}
-                        tiltMaxAngleY={5}
-                        perspective={1000}
-                        scale={1.02}
-                        className="bg-[#0a0a0a] p-8 rounded-3xl border border-white/10 shadow-2xl relative z-10"
+                    <SpotlightCard
+                        className="p-8 rounded-3xl relative z-10"
+                        spotlightColor="rgba(255, 255, 255, 0.1)"
                     >
                         <div className="grid grid-cols-3 gap-3 md:gap-4">
                             {board.map((cell, index) => (
@@ -175,7 +175,7 @@ const RoundCrossGame: React.FC = () => {
                                 </motion.button>
                             ))}
                         </div>
-                    </Tilt>
+                    </SpotlightCard>
 
                     {/* Winner Overlay */}
                     <AnimatePresence>
