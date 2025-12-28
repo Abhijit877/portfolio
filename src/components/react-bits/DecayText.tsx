@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import React from "react";
+
 
 const DecayText = ({ text = "Decay Text", className = "" }) => {
     return (
