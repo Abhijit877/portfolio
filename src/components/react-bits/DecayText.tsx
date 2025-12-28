@@ -1,5 +1,5 @@
-import { motion, useSpring, useTransform } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+
 
 const DecayText = ({ text = "Decay Text", className = "" }) => {
     return (

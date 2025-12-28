@@ -3,12 +3,11 @@ import { motion } from 'framer-motion';
 
 interface MagnetProps {
     children: React.ReactNode;
-    padding?: number;
     disabled?: boolean;
     magnetStrength?: number;
 }
 
-const Magnet: React.FC<MagnetProps> = ({ children, padding = 100, disabled = false, magnetStrength = 2 }) => {
+const Magnet: React.FC<MagnetProps> = ({ children, disabled = false, magnetStrength = 2 }) => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const ref = useRef<HTMLDivElement>(null);
 

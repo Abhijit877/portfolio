@@ -138,7 +138,7 @@ const TypingTest: React.FC = () => {
             title="Speed Coder"
             description="Syntax Proficiency Test"
             actions={
-                <Magnet padding={50} magnetStrength={3}>
+                <Magnet magnetStrength={3}>
                     <button
                         onClick={resetTest}
                         className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 transition-all text-xs font-medium text-text-secondary hover:text-text-primary backdrop-blur-md"
