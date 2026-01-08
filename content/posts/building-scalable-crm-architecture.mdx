@@ -1,0 +1,62 @@
+---
+title: "Building Scalable CRM Architecture"
+date: "2024-12-15"
+excerpt: "How I architected a real-time lead engine using D365 CE and WebSockets that reduced response time by 40% and handled $10M+ in pipeline volume."
+tags: ["System Design", "D365", "Architecture"]
+author: "Abhijit Behera"
+---
+
+# Building Scalable CRM Architecture
+
+When tasked with modernizing a Fortune 500 company's CRM system, the initial scope seemed straightforward: improve quote generation speed. The reality was far more complex.
+
+## The Challenge
+
+The legacy system was causing a **45% delay in quote generation** due to:
+
+- Manual data entry across multiple systems
+- Lack of real-time CPQ (Configure, Price, Quote) integration
+- No middleware between D365 and SAP ERP
+
+## The Architecture
+
+I designed a clean architecture using **Azure Logic Apps** as the middleware BFF (Backend for Frontend). This approach:
+
+```typescript
+// Simplified middleware pattern
+const processQuoteRequest = async (request: QuoteRequest) => {
+  // 1. Validate in D365
+  const validation = await d365.validateProducts(request.lineItems);
+  
+  // 2. Get real-time pricing from SAP
+  const pricing = await sap.calculatePricing(request.lineItems);
+  
+  // 3. Apply business rules
+  const quote = applyDiscountRules(pricing, request.customer);
+  
+  // 4. Return to UI without blocking
+  return { quote, estimatedDelivery: calculateETA(quote) };
+};
+```
+
+### Key Decisions
+
+1. **Non-blocking Operations**: Decoupled the D365 UI from SAP ERP
+2. **Event-Driven Updates**: Used WebSockets for real-time pricing
+3. **Caching Layer**: Redis for frequently accessed product configurations
+
+## The Results
+
+After six months of implementation:
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Quote Cycle Time | 2 days | 2 hours | **95%** |
+| Data Entry Errors | 12% | 1.2% | **90%** |
+| Pipeline Volume | $5M | $10M+ | **100%+** |
+
+## Lessons Learned
+
+1. **Start with the bottleneck**: Don't optimize everything at once
+2. **Invest in observability**: We caught 80% of issues before users reported them
+3. **Document architectural decisions**: Future you will thank present you

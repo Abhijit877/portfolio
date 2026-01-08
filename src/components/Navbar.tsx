@@ -1,33 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronDown, MessageSquare, Cpu, FileText, Type, Code, Briefcase } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUI } from '../context/UIContext';
 import { useRecruiter } from '../context/RecruiterContext';
 import ThemeToggle from './ThemeToggle';
+import Logo from './Logo';
 
 const Navbar: React.FC = () => {
     const { heroInView } = useUI();
     const { isRecruiterMode, toggleRecruiterMode } = useRecruiter();
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isVisible, setIsVisible] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLabsMobileOpen, setIsLabsMobileOpen] = useState(false);
-    const [isLabsHovered, setIsLabsHovered] = useState(false); // State for desktop hover
+    const [isLabsHovered, setIsLabsHovered] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
+    // Track scroll direction for smart show/hide
+    const lastScrollY = useRef(0);
+    const scrollThreshold = 100; // Hide after scrolling down this much
+
     useEffect(() => {
         const handleScroll = () => {
-            setIsScrolled(window.scrollY > 50);
+            const currentScrollY = window.scrollY;
+            const scrollingDown = currentScrollY > lastScrollY.current;
+
+            // Always show at very top of page
+            if (currentScrollY < 50) {
+                setIsVisible(true);
+            }
+            // Hide when scrolling down past threshold
+            else if (scrollingDown && currentScrollY > scrollThreshold) {
+                setIsVisible(false);
+            }
+            // Show immediately when scrolling up
+            else if (!scrollingDown) {
+                setIsVisible(true);
+            }
+
+            lastScrollY.current = currentScrollY;
+            setIsScrolled(currentScrollY > 50);
         };
 
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     const navLinks = [
         { name: 'Home', href: '/#hero' },
         { name: 'Projects', href: '/#projects' },
+        { name: 'Blog', href: '/blog' },
         { name: 'About', href: '/#about' },
         { name: 'Contact', href: '/#contact' },
     ];
@@ -40,7 +64,7 @@ const Navbar: React.FC = () => {
         { name: 'Markdown Live', path: '/labs/markdown', icon: Code },
     ];
 
-    const showNameInNavbar = !heroInView || location.pathname !== '/';
+    const showFullName = !heroInView || location.pathname !== '/';
 
     const handleRecruiterToggle = () => {
         toggleRecruiterMode();
@@ -51,90 +75,85 @@ const Navbar: React.FC = () => {
 
     return (
         <>
-            <motion.nav
-                initial={{ y: -100 }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.5 }}
-                className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled
-                    ? 'backdrop-blur-md bg-white/80 dark:bg-black/80 py-4 shadow-lg border-b border-black/5 dark:border-white/5'
-                    : 'bg-transparent py-6'
-                    }`}
+            {/* Full-Width Navbar */}
+            <motion.div
+                initial={{ y: -100, opacity: 0 }}
+                animate={{
+                    y: isVisible ? 0 : -100,
+                    opacity: isVisible ? 1 : 0
+                }}
+                transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
+                    mass: 0.8
+                }}
+                className="fixed top-0 left-0 right-0 z-50"
             >
-                <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-                    {/* Branding / Logo */}
-                    <Link to="/" className="relative h-8 w-48 overflow-visible z-50 flex items-center group">
-                        <AnimatePresence mode="wait">
-                            {showNameInNavbar ? (
-                                <motion.div
-                                    layoutId="brand-name"
-                                    className="text-2xl font-bold text-gray-900 dark:text-white tracking-widest font-sans absolute inset-0 flex items-center whitespace-nowrap"
-                                    transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                                >
-                                    Abhijit Behera
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="logo-full"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="text-lg font-bold font-mono text-gray-900 dark:text-white tracking-tight absolute inset-0 flex items-center"
-                                >
-                                    <span className="text-gray-400">&lt;</span>
-                                    <span>r4</span>
-                                    <span className="text-purple-600 dark:text-purple-500">.dev</span>
-                                    <span className="text-gray-400"> /&gt;</span>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </Link>
+                <nav
+                    className={`
+                        w-full flex items-center justify-between
+                        px-6 md:px-12 lg:px-16 py-4
+                        backdrop-blur-xl
+                        bg-background-primary/80 dark:bg-zinc-900/80
+                        border-b border-line/30 dark:border-zinc-700/40
+                        transition-all duration-300
+                        ${isScrolled ? 'py-3 bg-background-primary/95 dark:bg-zinc-900/95 shadow-lg shadow-black/5 dark:shadow-black/20' : ''}
+                    `}
+                >
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-8">
+                    {/* LEFT: Logo */}
+                    <Logo showFullName={showFullName} />
+
+                    {/* CENTER: Desktop Navigation Links */}
+                    <div className="hidden lg:flex items-center space-x-1">
                         {navLinks.map((link) => (
-                            <a
+                            <motion.a
                                 key={link.name}
                                 href={link.href}
-                                className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors duration-300 uppercase tracking-wider"
+                                className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-background-secondary rounded-lg transition-all duration-200"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                             >
                                 {link.name}
-                            </a>
+                            </motion.a>
                         ))}
 
-                        {/* Desktop Labs Dropdown */}
+                        {/* Labs Dropdown */}
                         <div
                             className="relative"
                             onMouseEnter={() => setIsLabsHovered(true)}
                             onMouseLeave={() => setIsLabsHovered(false)}
                         >
-                            <button
-                                className={`text-sm font-medium transition-colors duration-300 uppercase tracking-wider flex items-center gap-1 ${isLabsHovered ? 'text-purple-600 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}
+                            <motion.button
+                                className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-background-secondary rounded-lg transition-all duration-200 flex items-center gap-1"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                             >
                                 Labs
-                                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isLabsHovered ? 'rotate-180' : ''}`} />
-                            </button>
+                                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isLabsHovered ? 'rotate-180' : ''}`} />
+                            </motion.button>
 
                             <AnimatePresence>
                                 {isLabsHovered && (
                                     <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 10 }}
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                         transition={{ duration: 0.2 }}
-                                        className="absolute top-full right-0 mt-4 w-64 pt-2"
+                                        className="absolute top-full left-0 mt-2 w-56 pt-2"
                                     >
-                                        <div className="bg-white/90 dark:bg-black/90 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden p-2">
+                                        <div className="glass-premium rounded-xl shadow-lifted overflow-hidden p-2">
                                             {labsItems.map((item) => (
                                                 <Link
                                                     key={item.name}
                                                     to={item.path}
-                                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-purple-50 dark:hover:bg-white/10 transition-colors group"
+                                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent-primary/10 transition-all duration-200 group"
                                                 >
-                                                    <div className="p-2 rounded-md bg-purple-100 dark:bg-white/5 text-purple-600 dark:text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                                                    <div className="p-2 rounded-lg bg-background-tertiary text-accent-primary group-hover:bg-accent-primary group-hover:text-white transition-all duration-200">
                                                         <item.icon size={16} />
                                                     </div>
-                                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-purple-700 dark:group-hover:text-white transition-colors">
+                                                    <span className="text-sm font-medium text-text-primary">
                                                         {item.name}
                                                     </span>
                                                 </Link>
@@ -146,83 +165,91 @@ const Navbar: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Desktop CTA & Theme Toggle */}
-                    <div className="hidden md:flex items-center gap-4">
-                        {/* Recruiter Toggle */}
-                        <button
+                    {/* RIGHT: Actions */}
+                    <div className="flex items-center gap-2 md:gap-4">
+                        {/* Recruiter Toggle - Desktop */}
+                        <motion.button
                             onClick={handleRecruiterToggle}
-                            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${isRecruiterMode
-                                ? 'bg-purple-600 text-white border-purple-600 shadow-[0_0_15px_rgba(147,51,234,0.3)]'
-                                : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-700 hover:border-purple-500 hover:text-purple-500'
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${isRecruiterMode
+                                ? 'bg-accent-primary text-white border-accent-primary shadow-glow'
+                                : 'bg-transparent text-text-secondary border-line hover:border-accent-primary hover:text-accent-primary'
                                 }`}
                         >
                             <Briefcase size={14} />
-                            <span>{isRecruiterMode ? 'Mode: ON' : 'Recruit Me'}</span>
-                        </button>
+                            <span className="hidden lg:inline">{isRecruiterMode ? 'Mode: ON' : 'Recruit Me'}</span>
+                        </motion.button>
 
+                        {/* Theme Toggle */}
                         <ThemeToggle />
-                        <a
+
+                        {/* CTA Button - Desktop */}
+                        <motion.a
                             href="#contact"
-                            className="px-6 py-2 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-medium rounded-md hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors duration-300"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="hidden md:flex px-4 py-2 bg-accent-primary text-white text-sm font-medium rounded-lg hover:shadow-glow transition-all duration-300"
                         >
                             Let's Talk
-                        </a>
-                    </div>
+                        </motion.a>
 
-                    {/* Mobile Hamburger */}
-                    <button
-                        className="md:hidden text-gray-900 dark:text-white z-50 p-2"
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    >
-                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                    </button>
-                </div>
-            </motion.nav>
+                        {/* Mobile Menu Button */}
+                        <button
+                            className="lg:hidden p-2 text-text-primary hover:bg-background-secondary rounded-lg transition-colors"
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        >
+                            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                        </button>
+                    </div>
+                </nav>
+            </motion.div>
 
             {/* Mobile Menu */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: '-100%' }}
+                        initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: '-100%' }}
-                        transition={{ duration: 0.4, ease: 'easeInOut' }}
-                        className="fixed inset-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-xl md:hidden flex flex-col pt-24 px-8 overflow-y-auto"
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="fixed inset-0 z-40 bg-background-primary/98 backdrop-blur-xl lg:hidden pt-20"
                     >
-                        <div className="flex flex-col space-y-6">
+                        <div className="flex flex-col p-6 space-y-2">
                             {navLinks.map((link) => (
                                 <a
                                     key={link.name}
                                     href={link.href}
-                                    className="text-2xl font-bold text-gray-800 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors tracking-widest uppercase"
+                                    className="px-4 py-3 text-lg font-medium text-text-primary hover:bg-background-secondary rounded-xl transition-colors"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
                                     {link.name}
                                 </a>
                             ))}
 
-                            {/* Labs Mobile Dropdown */}
-                            <div className="border-t border-gray-200 dark:border-white/10 pt-4">
+                            {/* Labs Accordion */}
+                            <div className="border-t border-line pt-4 mt-4">
                                 <button
                                     onClick={() => setIsLabsMobileOpen(!isLabsMobileOpen)}
-                                    className="flex items-center justify-between w-full text-2xl font-bold text-gray-800 dark:text-gray-400 hover:text-purple-600 dark:hover:text-white transition-colors tracking-widest uppercase mb-4"
+                                    className="w-full flex items-center justify-between px-4 py-3 text-lg font-medium text-text-primary hover:bg-background-secondary rounded-xl transition-colors"
                                 >
                                     Labs
-                                    <ChevronDown className={`transition-transform duration-300 ${isLabsMobileOpen ? 'rotate-180' : ''}`} />
+                                    <ChevronDown className={`w-5 h-5 transition-transform duration-200 ${isLabsMobileOpen ? 'rotate-180' : ''}`} />
                                 </button>
+
                                 <AnimatePresence>
                                     {isLabsMobileOpen && (
                                         <motion.div
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            className="overflow-hidden flex flex-col space-y-4 pl-4"
+                                            className="overflow-hidden pl-4 space-y-1"
                                         >
                                             {labsItems.map((item) => (
                                                 <Link
                                                     key={item.name}
                                                     to={item.path}
-                                                    className="flex items-center gap-3 text-lg font-medium text-gray-600 dark:text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                                                    className="flex items-center gap-3 px-4 py-3 text-text-secondary hover:text-accent-primary hover:bg-background-secondary rounded-xl transition-colors"
                                                     onClick={() => setIsMobileMenuOpen(false)}
                                                 >
                                                     <item.icon size={18} />
@@ -234,32 +261,27 @@ const Navbar: React.FC = () => {
                                 </AnimatePresence>
                             </div>
 
-                            <div className="pt-6 border-t border-gray-200 dark:border-white/10 flex items-center justify-between">
-                                <span className="text-gray-600 dark:text-gray-400 uppercase tracking-widest text-sm font-bold">Theme</span>
-                                <div onClick={(e) => e.stopPropagation()} className="scale-125">
-                                    <ThemeToggle />
-                                </div>
+                            {/* Mobile Actions */}
+                            <div className="border-t border-line pt-6 mt-4 space-y-4">
+                                <button
+                                    onClick={handleRecruiterToggle}
+                                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all border ${isRecruiterMode
+                                        ? 'bg-accent-primary text-white border-accent-primary'
+                                        : 'bg-transparent text-text-secondary border-line'
+                                        }`}
+                                >
+                                    <Briefcase size={18} />
+                                    {isRecruiterMode ? 'Recruiter Mode Active' : 'Switch to Recruiter Mode'}
+                                </button>
+
+                                <a
+                                    href="#contact"
+                                    className="block w-full px-4 py-3 bg-accent-primary text-white text-center text-lg font-medium rounded-xl hover:shadow-glow transition-all"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                >
+                                    Let's Talk
+                                </a>
                             </div>
-
-                            {/* Mobile Recruiter Toggle */}
-                            <button
-                                onClick={handleRecruiterToggle}
-                                className={`w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl text-sm font-bold transition-all border ${isRecruiterMode
-                                    ? 'bg-purple-600 text-white border-purple-600'
-                                    : 'bg-transparent text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700'
-                                    }`}
-                            >
-                                <Briefcase size={18} />
-                                <span>{isRecruiterMode ? 'Recruiter Mode Active' : 'Switch to Recruiter Mode'}</span>
-                            </button>
-
-                            <a
-                                href="#contact"
-                                className="mt-4 px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-black text-lg font-medium rounded-full hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors text-center"
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                Let's Talk
-                            </a>
                         </div>
                     </motion.div>
                 )}

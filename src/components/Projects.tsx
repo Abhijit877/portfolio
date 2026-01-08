@@ -7,8 +7,8 @@ import { FiGithub, FiExternalLink, FiCode, FiBox, FiArrowRight } from 'react-ico
 const projects = [
   {
     id: 1,
-    name: 'Sales Automation Platform',
-    description: 'Full Sales module transformation (Lead to Invoice) for a Fortune 500 client. Implemented SAP/CPQ integrations, complex pricing logic, and 45% reduced quote cycle time via Power Automate.',
+    name: 'Real-Time Lead Engine',
+    description: 'Architected a real-time lead engine using D365 CE and WebSockets. Reduced response time by 40% and handled $10M+ in pipeline volume. Integrated SAP/CPQ for instant pricing.',
     tech: ['D365 CE', 'PCF', 'Power Automate', 'C# Plugin'],
     github: 'https://github.com/Abhijit877',
     demo: '#',
@@ -18,9 +18,9 @@ const projects = [
   },
   {
     id: 2,
-    name: 'PCF File Uploader',
-    description: 'Drag-and-drop file uploader for D365. Supports multiple file types, progress tracking, and async upload to Notes/Attachments. Reduced upload time by 50%.',
-    tech: ['TypeScript', 'React', 'PCF', 'Web API'],
+    name: 'Experimental Playground',
+    description: 'A WebGL research lab exploring React Three Fiber and GLSL shaders. Includes interactive 3D visualizations, particle systems, and real-time physics simulations.',
+    tech: ['TypeScript', 'React', 'Three.js', 'GLSL'],
     github: 'https://github.com/Abhijit877',
     demo: '#',
     icon: <FiCode />,
@@ -29,9 +29,9 @@ const projects = [
   },
   {
     id: 3,
-    name: 'Concrete Recyclers CRM',
-    description: 'End-to-end CRM modernization. Automated lead qualification and task delegation. Enhanced sales pipeline visibility by 60% through custom dashboarding.',
-    tech: ['D365 CE', 'JavaScript', 'Cloud Flows', 'Workflows'],
+    name: 'Enterprise CRM Overhaul',
+    description: 'Led end-to-end CRM modernization for a recycling enterprise. Automated 80% of lead qualification workflows. Enhanced sales pipeline visibility by 60% with custom Power BI dashboards.',
+    tech: ['D365 CE', 'JavaScript', 'Cloud Flows', 'Power BI'],
     github: 'https://github.com/Abhijit877',
     demo: '#',
     icon: <FiBox />,
@@ -40,9 +40,9 @@ const projects = [
   },
   {
     id: 4,
-    name: 'Enhanced Input Control',
-    description: 'Configurable PCF input control for high-volume data entry. Features built-in validation, formatting, and reusability across forms.',
-    tech: ['PCF', 'TypeScript', 'Fluent UI'],
+    name: 'Reusable PCF Library',
+    description: 'Built a suite of enterprise-grade PCF controls deployed across 15+ D365 implementations. Reduced form development time by 70% with configurable, accessible components.',
+    tech: ['PCF', 'TypeScript', 'Fluent UI', 'Web API'],
     github: 'https://github.com/Abhijit877',
     demo: '#',
     icon: <FiCode />,
@@ -50,6 +50,7 @@ const projects = [
     color: 'text-cyan-500'
   }
 ];
+
 
 const caseStudySteps = [
   {
@@ -74,7 +75,7 @@ const caseStudySteps = [
 
 const ProjectCardHorizontal = ({ project, index }: { project: any, index: number }) => {
   return (
-    <div className="relative w-[85vw] md:w-[60vw] h-[60vh] md:h-[70vh] flex-shrink-0 flex flex-col justify-between p-8 md:p-12 border-r border-line/10 group overflow-hidden bg-background-secondary dark:bg-background-primary/5 shadow-xl shadow-slate-200/50 dark:shadow-none transition-all duration-300 hover:border-accent-primary/50">
+    <div className="relative w-[85vw] md:w-[60vw] h-[60vh] md:h-[70vh] flex-shrink-0 flex flex-col justify-between p-8 md:p-12 border-r border-line group overflow-hidden bg-background-secondary transition-all duration-300 hover:border-accent-primary/50">
       {/* Ambient Background */}
       <div className={`absolute inset-0 bg-gradient-to-b ${project.bg} opacity-10 group-hover:opacity-20 transition-opacity duration-500`} />
 

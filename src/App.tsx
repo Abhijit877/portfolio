@@ -5,7 +5,6 @@ import { LayoutGroup } from 'framer-motion';
 import { ThemeProvider } from './context/ThemeContext';
 import { RecruiterProvider } from './context/RecruiterContext';
 import { UIProvider } from './context/UIContext';
-// import Header from './components/Header'; // Deprecated for Home
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AIChatWidget from './components/AIChatWidget';
@@ -16,6 +15,8 @@ import TypingTest from './pages/TypingTest';
 import MarkdownConverter from './pages/MarkdownConverter';
 import Assistant from './pages/Assistant';
 import Labs from './pages/Labs';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import ScrollToTop from './components/ScrollToTop';
 import RecruiterMode from './pages/RecruiterMode';
 import SmoothScroll from './components/SmoothScroll';
@@ -23,10 +24,11 @@ import SmoothScroll from './components/SmoothScroll';
 // Layout wrapper to handle conditional Navbar logic using useLocation
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const showNavbar = location.pathname === '/';
+  // Show navbar on home page and blog pages
+  const showNavbar = location.pathname === '/' || location.pathname.startsWith('/blog');
 
   return (
-    <div className="min-h-screen bg-background-primary text-text-primary transition-colors duration-300 font-sans selection:bg-accent-primary selection:text-white">
+    <div className="min-h-screen bg-background-primary text-text-primary transition-colors duration-300 font-sans selection:bg-accent-primary selection:text-white global-noise-overlay">
       {showNavbar && <Navbar />}
       {children}
     </div>
@@ -54,6 +56,8 @@ function App() {
                 }>
                   <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
                     <Route path="/labs" element={<Labs />} />
                     <Route path="/labs/assistant" element={<Assistant />} />
                     <Route path="/labs/minimax" element={<RoundCrossGame />} />

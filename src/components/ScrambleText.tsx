@@ -1,76 +1,105 @@
-import React, { useState, useEffect, useRef } from 'react';
-// motion removed
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface ScrambleTextProps {
     text: string;
     className?: string;
     scrambleSpeed?: number;
     scrambleDuration?: number;
-    revealDirection?: 'start' | 'end' | 'random';
+    delayStart?: number;
+    onComplete?: () => void;
 }
 
-const CHARS = '!<>-_\\/[]{}—=+*^?#________';
+// Elite readable character set - less dense, more elegant
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 const ScrambleText: React.FC<ScrambleTextProps> = ({
     text,
     className = '',
-    scrambleSpeed = 40,
-    scrambleDuration = 600
+    scrambleSpeed = 30,
+    scrambleDuration = 1200,
+    delayStart = 0,
+    onComplete,
 }) => {
-    const [displayText, setDisplayText] = useState(text);
+    const [displayText, setDisplayText] = useState('');
     const [isScrambling, setIsScrambling] = useState(false);
-
-    // Use a ref to keep track of the current animation frame/interval to cleanup properly
+    const [hasStarted, setHasStarted] = useState(false);
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    useEffect(() => {
-        // When text changes, start scrambling
-        startScramble();
-
-        return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-        };
-    }, [text]);
-
-    const startScramble = () => {
+    const startScramble = useCallback(() => {
+        if (hasStarted) return;
+        setHasStarted(true);
         setIsScrambling(true);
-        let duration = 0;
+
+        let elapsedTime = 0;
+
+        // Start with all scrambled characters
+        setDisplayText(
+            text.split('').map(char =>
+                char === ' ' ? ' ' : CHARS[Math.floor(Math.random() * CHARS.length)]
+            ).join('')
+        );
 
         if (intervalRef.current) clearInterval(intervalRef.current);
 
         intervalRef.current = setInterval(() => {
-            duration += scrambleSpeed;
-
-            // Calculate how much of the text should be revealed based on progress
-            const progress = Math.min(duration / scrambleDuration, 1);
+            elapsedTime += scrambleSpeed;
+            const progress = Math.min(elapsedTime / scrambleDuration, 1);
 
             const scrambled = text.split('').map((char, index) => {
-                // If character is a space, keep it
+                // Preserve spaces
                 if (char === ' ') return ' ';
 
-                // If we've passed the "reveal point" for this index (pseudo-randomly or linear)
-                // Let's do a linear reveal from left to right for readability + hacker feel
-                if (index < text.length * progress) {
+                // Calculate reveal threshold with slight randomization for organic feel
+                const charProgress = (index / text.length) + (Math.random() * 0.1);
+
+                // If we've passed the reveal point for this character
+                if (progress > charProgress) {
                     return char;
                 }
 
-                // Otherwise return random char
+                // Still scrambling - cycle through random chars
                 return CHARS[Math.floor(Math.random() * CHARS.length)];
             }).join('');
 
             setDisplayText(scrambled);
 
-            if (duration >= scrambleDuration) {
+            if (elapsedTime >= scrambleDuration) {
                 if (intervalRef.current) clearInterval(intervalRef.current);
-                setDisplayText(text); // Ensure final state is clean
+                setDisplayText(text);
                 setIsScrambling(false);
+                onComplete?.();
             }
         }, scrambleSpeed);
-    };
+    }, [text, scrambleSpeed, scrambleDuration, hasStarted, onComplete]);
+
+    useEffect(() => {
+        // Clear any existing timeout
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+        // Start after delay
+        timeoutRef.current = setTimeout(() => {
+            startScramble();
+        }, delayStart);
+
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, [delayStart, startScramble]);
+
+    // Reset when text changes
+    useEffect(() => {
+        setHasStarted(false);
+        setDisplayText('');
+    }, [text]);
 
     return (
-        <span className={`${className} ${isScrambling ? 'animate-pulse' : ''}`}>
-            {displayText}
+        <span
+            className={`${className} ${isScrambling ? 'select-none' : ''}`}
+            style={{ fontFamily: 'inherit' }}
+        >
+            {displayText || text}
         </span>
     );
 };

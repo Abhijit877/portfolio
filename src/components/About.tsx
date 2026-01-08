@@ -36,22 +36,30 @@ const About: React.FC = () => {
       <div className="layout-container grid md:grid-cols-2 gap-12 items-center">
 
         {/* Story / Text */}
-        <div>
-          <h2 className="text-3xl font-bold mb-6">
+        <div className="spacing-luxurious">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
             <FallingText content="How I Build Software" delay={0.2} splitBy="char" />
           </h2>
-          <p className="text-text-secondary mb-6 leading-relaxed">
-            <FallingText
-              content="Beyond just writing code, I engineer solutions. My approach to frontend development is grounded in computer science fundamentals and modern design patterns."
-              delay={0.4}
-            />
-          </p>
-          <p className="text-text-secondary mb-8 leading-relaxed">
-            I don't just "make it work"—I make it scalable, maintainable, and delightful to use. Whether it's a complex dashboard or a landing page, I bring the same level of engineering rigor.
-          </p>
+          <div className="section-divider mb-8"></div>
+          <div className="content-block-large space-y-6">
+            <p className="text-text-secondary text-lg leading-relaxed-plus">
+              <FallingText
+                content="Beyond just writing code, I engineer solutions."
+                delay={0.4}
+              />
+            </p>
+            <p className="text-text-secondary text-lg leading-relaxed-plus">
+              My approach to frontend development is grounded in computer science fundamentals and modern design patterns.
+            </p>
+            <p className="text-text-secondary text-lg leading-relaxed-plus">
+              I don't just "make it work"—I make it scalable, maintainable, and delightful to use.
+            </p>
+          </div>
+
+          <h3 className="text-2xl font-semibold text-text-primary mb-6 mt-12">Core Engineering Principles</h3>
 
           {!isRecruiterMode && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {principles.map((p, i) => (
                 <motion.div
                   key={p.title}
@@ -59,11 +67,11 @@ const About: React.FC = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="p-4 bg-background-primary rounded-lg border border-line hover:border-accent-primary/50 transition-colors"
+                  className="p-6 bg-background-primary rounded-lg border border-line hover:border-accent-primary/50 transition-all hover:shadow-lifted"
                 >
-                  <div className="text-accent-primary mb-2 text-xl">{p.icon}</div>
-                  <h3 className="font-bold text-sm mb-1">{p.title}</h3>
-                  <p className="text-xs text-text-secondary">{p.description}</p>
+                  <div className="text-accent-primary mb-3 text-2xl">{p.icon}</div>
+                  <h4 className="font-bold text-base mb-2 text-text-primary">{p.title}</h4>
+                  <p className="text-sm text-text-secondary leading-relaxed">{p.description}</p>
                 </motion.div>
               ))}
             </div>

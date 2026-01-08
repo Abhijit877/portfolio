@@ -1,111 +1,146 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useInView, useScroll, useTransform, motion } from 'framer-motion';
 import { useUI } from '../context/UIContext';
-import { FiArrowRight, FiDownload, FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
+import { FiMessageCircle, FiDownload } from 'react-icons/fi';
 import Button from './Button';
 import ProfileSketch from './ProfileSketch';
 import { WordRotate } from './WordRotate';
+import MagneticButton from './MagneticButton';
 
 const Hero: React.FC = () => {
   const { setHeroInView } = useUI();
   const ref = useRef(null);
   const isInView = useInView(ref, { amount: 0.5 });
+  const [showName, setShowName] = useState(false);
 
   useEffect(() => {
     setHeroInView(isInView);
   }, [isInView, setHeroInView]);
 
+  // Trigger name animation after a brief delay
+  useEffect(() => {
+    const timer = setTimeout(() => setShowName(true), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   const { scrollY } = useScroll();
 
-  // Scroll-driven animations for the name
-  const scale = useTransform(scrollY, [0, 200], [1, 0.6]);
-  const y = useTransform(scrollY, [0, 200], [0, 140]);
-  const x = useTransform(scrollY, [0, 200], [0, -40]);
-
-  // Opacity fade for other elements to clear clutter
-  const fadeOpacity = useTransform(scrollY, [0, 50], [1, 0]);
+  // Scroll-driven animations - subtle fade only for scroll indicator
+  const scrollIndicatorOpacity = useTransform(scrollY, [0, 100], [1, 0]);
 
   return (
-    <section ref={ref} className="min-h-[90vh] w-full bg-background-primary flex items-center justify-center px-6 md:px-12 pt-32 pb-12 md:py-32 relative overflow-hidden transition-colors duration-300">
-      {/* Background Gradients */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 via-transparent to-teal-900/10 opacity-50" />
+    <section
+      ref={ref}
+      className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-background-primary transition-colors duration-300"
+    >
+      {/* Subtle Background - Minimal for clean aesthetic */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 noise-texture opacity-20" />
       </div>
 
-      <div className="flex flex-col-reverse md:flex-row items-center justify-center gap-12 w-full max-w-7xl relative z-10">
+      {/* Main Content Container - Centered Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center w-full max-w-7xl px-6 md:px-12 py-20 relative z-10">
 
-        {/* LEFT COLUMN (Desktop) / BOTTOM (Mobile) - TEXT */}
-        <div className="flex flex-col justify-center items-center md:items-start space-y-8 z-20 w-full md:w-1/2">
+        {/* LEFT COLUMN - TEXT */}
+        <div className="flex flex-col justify-center items-center lg:items-start space-y-6 z-20 order-2 lg:order-1">
 
-          {/* 1. ANIMATED NAME */}
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-text-primary relative text-center md:text-left">
-            <motion.span style={{ opacity: fadeOpacity }} className="inline-block md:mr-4 block md:inline-block mb-2 md:mb-0">Hi, I'm</motion.span>
-            <br className="hidden md:block" />
-            <motion.span
-              layoutId="brand-name"
-              style={{ scale, x, y, originX: 0, originY: 0 }}
-              className="inline-block animate-text-flow bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-500 bg-clip-text text-transparent bg-[length:200%_auto]"
-            >
-              Abhijit Behera
-            </motion.span>
-          </h1>
+          {/* 1. ANIMATED NAME - Orange to Purple Gradient */}
+          <motion.h1
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-center lg:text-left leading-[1.1]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: showName ? 1 : 0, y: showName ? 0 : 20 }}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 bg-clip-text text-transparent">
+              Hi, I'm Abhijit Behera
+            </span>
+          </motion.h1>
 
-          {/* 2. ROTATING TEXT */}
-          <motion.div style={{ opacity: fadeOpacity }} className="text-text-secondary text-2xl md:text-4xl font-light leading-snug text-center md:text-left">
+          {/* 2. ROTATING TEXT - alaadev style fade effect */}
+          <motion.div
+            className="text-text-secondary text-xl sm:text-2xl md:text-3xl font-light leading-snug text-center lg:text-left"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+          >
             <span>I build </span>
             <WordRotate words={["Scalable", "Modern", "Automated", "Secure"]} />
             <br />
             <span>digital solutions.</span>
           </motion.div>
 
-          <motion.div style={{ opacity: fadeOpacity }} className="w-full flex flex-col items-center md:items-start">
-            <p className="text-text-secondary max-w-lg mt-4 text-lg text-center md:text-left">
+          {/* 3. DESCRIPTION with Blue Accent Line */}
+          <motion.div
+            className="w-full flex flex-col items-center lg:items-start"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            <p className="accent-line-left text-text-secondary max-w-lg text-base md:text-lg leading-relaxed text-center lg:text-left">
               Dynamics 365 CE Specialist crafting high-performance CRM architecture.
             </p>
 
-            {/* Buttons */}
-            <div className="flex flex-wrap gap-4 pt-4 justify-center md:justify-start">
-              <Button href="#projects" variant="primary" icon={<FiArrowRight />}>
-                Explore Work
-              </Button>
-              <Button
-                href="src/assets/Abhijit-Behera-CV.pdf"
-                variant="secondary"
-                icon={<FiDownload />}
-              >
-                Resume
-              </Button>
-            </div>
-
-            {/* Socials */}
-            <div className="flex gap-6 pt-4 text-slate-500 justify-center md:justify-start">
-              <SocialLink href="https://github.com/Abhijit877" icon={<FiGithub />} />
-              <SocialLink href="https://linkedin.com" icon={<FiLinkedin />} />
-              <SocialLink href="https://twitter.com" icon={<FiTwitter />} />
+            {/* CTA Buttons - Resume / Let's Talk with 32px top margin */}
+            <div className="flex flex-wrap gap-4 justify-center lg:justify-start mt-8">
+              <MagneticButton strength={0.3}>
+                <Button
+                  href="/Abhijit-Behera-CV.pdf"
+                  variant="primary"
+                  icon={<FiDownload />}
+                >
+                  Resume
+                </Button>
+              </MagneticButton>
+              <MagneticButton strength={0.3}>
+                <Button
+                  href="#contact"
+                  variant="secondary"
+                  icon={<FiMessageCircle />}
+                >
+                  Let's Talk
+                </Button>
+              </MagneticButton>
             </div>
           </motion.div>
         </div>
 
-        {/* RIGHT COLUMN (Desktop) / TOP (Mobile) - SKETCH */}
-        <motion.div style={{ opacity: fadeOpacity }} className="w-full md:w-1/2 flex justify-center items-center">
-          <div className="w-full max-w-[300px] md:max-w-md h-auto object-contain">
+        {/* RIGHT COLUMN - SVG Profile Sketch */}
+        <motion.div
+          className="flex justify-center items-center order-1 lg:order-2"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          <div className="w-full max-w-[400px] md:max-w-[500px] lg:max-w-[550px] xl:max-w-[600px] aspect-square flex items-center justify-center">
             <ProfileSketch />
           </div>
         </motion.div>
       </div>
+
+      {/* Scroll Indicator */}
+      <motion.div
+        style={{ opacity: scrollIndicatorOpacity }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-text-secondary"
+      >
+        <span className="text-xs uppercase tracking-widest">Scroll</span>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="w-5 h-8 rounded-full border-2 border-line flex justify-center pt-1"
+        >
+          <motion.div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+        </motion.div>
+      </motion.div>
+
+      {/* Gradient Mask - Dissolves into next section */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to bottom, transparent, var(--bg-primary))'
+        }}
+      />
     </section>
   );
 };
-
-const SocialLink = ({ href, icon }: { href: string; icon: React.ReactNode }) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="hover:text-accent-primary transform hover:scale-110 transition-all duration-200"
-  >
-    {icon}
-  </a>
-);
 
 export default Hero;

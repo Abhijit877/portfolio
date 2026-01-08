@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import FallingText from './FallingText';
 import { useRecruiter } from '../context/RecruiterContext';
 import {
@@ -15,70 +15,106 @@ import { BsMicrosoft } from 'react-icons/bs';
 import { DiMsqlServer } from 'react-icons/di';
 import { VscAzure, VscAzureDevops } from 'react-icons/vsc';
 
-const skillGroups = {
-  backend: [
-    { name: 'Dynamics 365 CE', icon: <BsMicrosoft />, level: 'Expert' },
-    { name: 'C# .NET', icon: <SiSharp />, level: 'Expert' },
-    { name: 'Power Automate', icon: <VscAzure />, level: 'Expert' },
-    { name: 'SQL Server', icon: <DiMsqlServer />, level: 'Intermediate' },
-    { name: 'REST APIs', icon: <SiDotnet />, level: 'Advanced' }
-  ],
-  frontend: [
-    { name: 'PCF Controls', icon: <SiJavascript />, level: 'Advanced' },
-    { name: 'TypeScript', icon: <SiTypescript />, level: 'Advanced' },
-    { name: 'React', icon: <SiReact />, level: 'Advanced' },
-    { name: 'JavaScript/jQuery', icon: <SiJavascript />, level: 'Advanced' }
-  ],
-  tools: [
-    { name: 'Azure DevOps', icon: <VscAzureDevops />, level: 'DevOps' },
-    { name: 'Git', icon: <SiGit />, level: 'Intermediate' },
-    { name: 'JIRA', icon: <SiJira />, level: 'Intermediate' }
-  ]
-};
+// Marquee animation styles
+const marqueeStyles = `
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
 
-const ParallaxRow = ({ title, skills, velocity }: { title: string, skills: any[], velocity: number }) => {
-  const rowRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: rowRef,
-    offset: ["start end", "end start"]
-  });
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
 
-  // Parallax logic: Elements move at different speeds relative to scroll
-  // "Horizon line" = center of screen.
-  // If velocity is high, it moves faster than scroll (pseudo depth).
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
 
-  // Simple transform: y position based on scroll progress
-  const y = useTransform(scrollYProgress, [0, 1], [-100 * velocity, 100 * velocity]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 0.8]);
+.animate-marquee-reverse {
+  animation: marquee-reverse 30s linear infinite;
+}
+
+.marquee-container:hover .animate-marquee,
+.marquee-container:hover .animate-marquee-reverse {
+  animation-play-state: paused;
+}
+`;
+
+// All skills in a flat array for the marquee
+const allSkills = [
+  { name: 'Dynamics 365 CE', icon: <BsMicrosoft />, color: '#00A4EF' },
+  { name: 'C# .NET', icon: <SiSharp />, color: '#512BD4' },
+  { name: 'Power Automate', icon: <VscAzure />, color: '#0066FF' },
+  { name: 'SQL Server', icon: <DiMsqlServer />, color: '#CC2927' },
+  { name: 'REST APIs', icon: <SiDotnet />, color: '#512BD4' },
+  { name: 'PCF Controls', icon: <SiJavascript />, color: '#F7DF1E' },
+  { name: 'TypeScript', icon: <SiTypescript />, color: '#3178C6' },
+  { name: 'React', icon: <SiReact />, color: '#61DAFB' },
+  { name: 'JavaScript', icon: <SiJavascript />, color: '#F7DF1E' },
+  { name: 'Azure DevOps', icon: <VscAzureDevops />, color: '#0078D7' },
+  { name: 'Git', icon: <SiGit />, color: '#F05032' },
+  { name: 'JIRA', icon: <SiJira />, color: '#0052CC' },
+];
+
+// Single skill item for marquee
+const SkillItem = ({ skill }: { skill: typeof allSkills[0] }) => (
+  <div className="flex items-center gap-3 px-6 py-3 mx-3 bg-background-secondary/80 backdrop-blur-sm border border-line rounded-full hover:border-accent-primary/50 hover:bg-background-secondary transition-all duration-300 cursor-default group whitespace-nowrap">
+    <span
+      className="text-2xl transition-transform duration-300 group-hover:scale-110"
+      style={{ color: skill.color }}
+    >
+      {skill.icon}
+    </span>
+    <span className="text-sm font-medium text-text-primary">{skill.name}</span>
+  </div>
+);
+
+// Infinite scrolling marquee row
+const MarqueeRow = ({ skills, reverse = false, speed = 30 }: { skills: typeof allSkills, reverse?: boolean, speed?: number }) => {
+  // Double the skills array for seamless loop
+  const doubledSkills = [...skills, ...skills];
 
   return (
-    <motion.div
-      ref={rowRef}
-      style={{ y, opacity, scale }}
-      className="mb-12 relative"
-    >
-      <h3 className="text-xl font-bold text-accent-primary mb-6 text-center tracking-widest uppercase opacity-70">{title}</h3>
-      <div className="flex flex-wrap justify-center gap-6">
-        {skills.map((skill) => (
-          <div key={skill.name} className="flex flex-col items-center justify-center w-32 h-32 bg-background-secondary dark:bg-background-primary/50 backdrop-blur-md border border-line/50 rounded-2xl hover:border-accent-primary transition-all hover:scale-110 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] shadow-lg shadow-slate-200/50 dark:shadow-none">
-            <div className="text-4xl text-text-secondary mb-2">{skill.icon}</div>
-            <span className="text-xs font-bold text-text-primary text-center px-2">{skill.name}</span>
-          </div>
+    <div className="marquee-container overflow-hidden py-2">
+      <div
+        className={`flex ${reverse ? 'animate-marquee-reverse' : 'animate-marquee'}`}
+        style={{ animationDuration: `${speed}s` }}
+      >
+        {doubledSkills.map((skill, index) => (
+          <SkillItem key={`${skill.name}-${index}`} skill={skill} />
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 const Skills: React.FC = () => {
   const { isRecruiterMode } = useRecruiter();
 
+  // Split skills for two rows
+  const firstRowSkills = allSkills.slice(0, 6);
+  const secondRowSkills = allSkills.slice(6);
+
   return (
-    <section className="section-padding bg-background-secondary relative overflow-hidden min-h-screen flex items-center">
+    <section
+      className="py-20 md:py-32 relative overflow-hidden"
+      style={{ backgroundColor: 'var(--bg-primary)' }}
+    >
+      {/* Inject marquee styles */}
+      <style>{marqueeStyles}</style>
+
       <div className="layout-container relative z-10">
-        <div className="mb-20 text-center">
-          <h2 className="text-4xl font-bold mb-4">
+        <div className="scannable-section text-center mb-16">
+          <h2 className="spacing-generous">
             <FallingText
               content="Technical Landscape"
               highlightWords={["Technical", "Landscape"]}
@@ -87,7 +123,7 @@ const Skills: React.FC = () => {
               className="justify-center"
             />
           </h2>
-          <div className="text-text-secondary max-w-2xl mx-auto">
+          <div className="text-text-secondary max-w-2xl mx-auto text-lg md:text-xl">
             <FallingText
               content="A comprehensive view of my specialized stack."
               delay={0.6}
@@ -97,40 +133,34 @@ const Skills: React.FC = () => {
         </div>
 
         {isRecruiterMode ? (
-          <div className="space-y-8">
-            {Object.entries(skillGroups).map(([key, group]) => (
-              <div key={key}>
-                <h3 className="text-lg font-bold capitalize mb-4 text-accent-primary">{key}</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {group.map(skill => (
-                    <div key={skill.name} className="flex items-center space-x-3 p-4 bg-background-primary border border-line rounded-lg">
-                      <span className="text-xl">{skill.icon}</span>
-                      <div>
-                        <div className="font-bold text-sm">{skill.name}</div>
-                        <div className="text-xs text-text-secondary">{skill.level}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          // Compact grid view for recruiter mode
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {allSkills.map(skill => (
+              <motion.div
+                key={skill.name}
+                className="flex items-center gap-3 p-4 bg-background-secondary border border-line rounded-xl hover:border-accent-primary/50 transition-all duration-300"
+                whileHover={{ scale: 1.02 }}
+              >
+                <span className="text-xl" style={{ color: skill.color }}>{skill.icon}</span>
+                <span className="text-sm font-medium text-text-primary">{skill.name}</span>
+              </motion.div>
             ))}
           </div>
         ) : (
-          <div className="perspective-1000 py-20">
-            {/* 
-                Deep depth: Backend (Core) 
-                Mid: Frontend 
-                Close: Tools 
-             */}
-            <ParallaxRow title="Core Architecture & Backend" skills={skillGroups.backend} velocity={1} />
-            <ParallaxRow title="Frontend & Interface" skills={skillGroups.frontend} velocity={-0.5} />
-            <ParallaxRow title="DevOps & Tooling" skills={skillGroups.tools} velocity={1.5} />
+          // Infinite scrolling marquee
+          <div className="space-y-4 -mx-6 md:-mx-12">
+            {/* First row - normal direction */}
+            <MarqueeRow skills={firstRowSkills} speed={25} />
+
+            {/* Second row - reverse direction */}
+            <MarqueeRow skills={secondRowSkills} reverse speed={30} />
           </div>
         )}
       </div>
 
-      {/* Background Decor */}
-      <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent blur-sm" />
+      {/* Subtle gradient edges to fade marquee */}
+      <div className="absolute left-0 top-0 bottom-0 w-20 md:w-40 bg-gradient-to-r from-[var(--bg-primary)] to-transparent pointer-events-none z-20" />
+      <div className="absolute right-0 top-0 bottom-0 w-20 md:w-40 bg-gradient-to-l from-[var(--bg-primary)] to-transparent pointer-events-none z-20" />
     </section>
   );
 };
